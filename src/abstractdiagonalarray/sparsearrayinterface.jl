@@ -1,5 +1,5 @@
 using Compat: Returns, allequal
-using ..SparseArraysBase: SparseArraysBase
+using SparseArraysBase: SparseArraysBase
 
 # `SparseArraysBase` interface
 function SparseArraysBase.index_to_storage_index(

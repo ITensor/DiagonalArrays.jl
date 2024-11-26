@@ -1,8 +1,7 @@
 @eval module $(gensym())
 using Test: @test, @testset, @test_broken
-using NDTensors.DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
-using NDTensors.SparseArraysBase: SparseArrayDOK
-using NDTensors.SparseArraysBase: stored_length
+using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
+using SparseArraysBase: SparseArrayDOK, stored_length
 @testset "Test NDTensors.DiagonalArrays" begin
   @testset "README" begin
     @test include(

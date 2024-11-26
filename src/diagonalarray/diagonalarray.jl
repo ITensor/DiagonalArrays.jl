@@ -1,6 +1,4 @@
-using ..SparseArraysBase: Zero, getindex_zero_function
-# TODO: Put into `DiagonalArraysSparseArraysBaseExt`?
-using ..SparseArraysBase: SparseArraysBase, SparseArrayDOK
+using SparseArraysBase: SparseArraysBase, SparseArrayDOK, Zero, getindex_zero_function
 
 struct DiagonalArray{T,N,Diag<:AbstractVector{T},Zero} <: AbstractDiagonalArray{T,N}
   diag::Diag

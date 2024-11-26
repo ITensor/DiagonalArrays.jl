@@ -1,4 +1,5 @@
 module DiagonalArrays
+
 include("diaginterface/defaults.jl")
 include("diaginterface/diaginterface.jl")
 include("diaginterface/diagindex.jl")
@@ -11,4 +12,5 @@ include("diagonalarray/diagonalarray.jl")
 include("diagonalarray/diagonalmatrix.jl")
 include("diagonalarray/diagonalvector.jl")
 include("diagonalarray/arraylayouts.jl")
+
 end
