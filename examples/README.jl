@@ -15,7 +15,15 @@
 ```julia
 julia> using Pkg: Pkg
 
-julia> Pkg.add("https://github.com/ITensor/DiagonalArrays.jl")
+julia> Pkg.add(url="https://github.com/ITensor/BroadcastMapConversion.jl")
+
+julia> Pkg.add(url="https://github.com/ITensor/NestedPermutedDimsArrays.jl")
+
+julia> Pkg.add(url="https://github.com/ITensor/TypeParameterAccessors.jl")
+
+julia> Pkg.add(url="https://github.com/ITensor/SparseArraysBase.jl")
+
+julia> Pkg.add(url="https://github.com/ITensor/DiagonalArrays.jl")
 ```
 =#
 
