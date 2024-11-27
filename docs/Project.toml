@@ -2,3 +2,7 @@
 DiagonalArrays = "74fd4be6-21e2-4f6f-823a-4360d37c7a77"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
+SparseArraysBase = "0d5efcca-f356-4864-8770-e1ed8d78f208"
+
+[sources]
+SparseArraysBase = {url = "https://github.com/ITensor/SparseArraysBase.jl"}

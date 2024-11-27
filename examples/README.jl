@@ -21,7 +21,7 @@ julia> Pkg.add("https://github.com/ITensor/DiagonalArrays.jl")
 
 # ## Examples
 
-using NDTensors.DiagonalArrays:
+using DiagonalArrays:
   DiagonalArray, DiagonalMatrix, DiagIndex, DiagIndices, diaglength, isdiagindex
 using Test: @test
 

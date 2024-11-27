@@ -1,4 +1,3 @@
-using Compat: Returns, allequal
 using SparseArraysBase: SparseArraysBase
 
 # `SparseArraysBase` interface
