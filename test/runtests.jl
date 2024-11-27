@@ -1,18 +1,14 @@
 @eval module $(gensym())
 using Test: @test, @testset, @test_broken
-using NDTensors.DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
-using NDTensors.SparseArraysBase: SparseArrayDOK
-using NDTensors.SparseArraysBase: stored_length
-@testset "Test NDTensors.DiagonalArrays" begin
+using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
+using SparseArraysBase: SparseArrayDOK, stored_length
+@testset "Test DiagonalArrays" begin
   @testset "README" begin
-    @test include(
-      joinpath(
-        pkgdir(DiagonalArrays), "src", "lib", "DiagonalArrays", "examples", "README.jl"
-      ),
-    ) isa Any
+    @test include(joinpath(pkgdir(DiagonalArrays), "examples", "README.jl")) isa Any
   end
-  @testset "DiagonalArray (eltype=$elt)" for elt in
-                                             (Float32, Float64, ComplexF32, ComplexF64)
+  @testset "DiagonalArray (eltype=$elt)" for elt in (
+    Float32, Float64, Complex{Float32}, Complex{Float64}
+  )
     @testset "Basics" begin
       a = fill(one(elt), 2, 3)
       @test diaglength(a) == 2

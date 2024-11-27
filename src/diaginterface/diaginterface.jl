@@ -1,5 +1,3 @@
-using Compat: allequal
-
 diaglength(a::AbstractArray{<:Any,0}) = 1
 
 function diaglength(a::AbstractArray)

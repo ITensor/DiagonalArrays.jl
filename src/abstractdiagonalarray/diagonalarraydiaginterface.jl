@@ -1,4 +1,4 @@
-using ..SparseArraysBase: SparseArraysBase, StorageIndex, StorageIndices
+using SparseArraysBase: SparseArraysBase, StorageIndex, StorageIndices
 
 SparseArraysBase.StorageIndex(i::DiagIndex) = StorageIndex(index(i))
 

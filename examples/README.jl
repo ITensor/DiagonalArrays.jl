@@ -1,10 +1,29 @@
 # # DiagonalArrays.jl
-#
-# A Julia `DiagonalArray` type.
+# 
+# [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ITensor.github.io/DiagonalArrays.jl/stable/)
+# [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ITensor.github.io/DiagonalArrays.jl/dev/)
+# [![Build Status](https://github.com/ITensor/DiagonalArrays.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ITensor/DiagonalArrays.jl/actions/workflows/CI.yml?query=branch%3Amain)
+# [![Coverage](https://codecov.io/gh/ITensor/DiagonalArrays.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/ITensor/DiagonalArrays.jl)
+# [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
+# [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-using NDTensors.DiagonalArrays:
+# A n-dimensional diagonal array type in Julia.
+
+# ## Installation instructions
+
+#=
+```julia
+julia> using Pkg: Pkg
+
+julia> Pkg.add("https://github.com/ITensor/DiagonalArrays.jl")
+```
+=#
+
+# ## Examples
+
+using DiagonalArrays:
   DiagonalArray, DiagonalMatrix, DiagIndex, DiagIndices, diaglength, isdiagindex
-using Test
+using Test: @test
 
 function main()
   d = DiagonalMatrix([1.0, 2.0, 3.0])
@@ -67,13 +86,3 @@ function main()
 end
 
 main()
-
-#=
-You can generate this README with:
-```julia
-using Literate
-using NDTensors.DiagonalArrays
-dir = joinpath(pkgdir(DiagonalArrays), "src", "lib", "DiagonalArrays")
-Literate.markdown(joinpath(dir, "examples", "README.jl"), dir; flavor=Literate.CommonMarkFlavor())
-```
-=#
