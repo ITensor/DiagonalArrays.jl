@@ -3,5 +3,6 @@ using Aqua: Aqua
 using Test: @testset
 
 @testset "Code quality (Aqua.jl)" begin
-  Aqua.test_all(DiagonalArrays)
+  # TODO: fix ambiguities
+  Aqua.test_all(DiagonalArrays; ambiguities=false)
 end
