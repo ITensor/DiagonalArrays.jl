@@ -1,7 +1,9 @@
 using DiagonalArrays: DiagonalArrays
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
 
-DocMeta.setdocmeta!(DiagonalArrays, :DocTestSetup, :(using DiagonalArrays); recursive=true)
+DocMeta.setdocmeta!(
+  DiagonalArrays, :DocTestSetup, :(using DiagonalArrays); recursive=true
+)
 
 include("make_index.jl")
 

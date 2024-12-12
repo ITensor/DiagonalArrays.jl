@@ -1,55 +1,61 @@
-@eval module $(gensym())
-using Test: @test, @testset, @test_broken
-using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
-using SparseArraysBase: SparseArrayDOK, stored_length
-@testset "Test DiagonalArrays" begin
-  @testset "README" begin
-    @test include(joinpath(pkgdir(DiagonalArrays), "examples", "README.jl")) isa Any
-  end
-  @testset "DiagonalArray (eltype=$elt)" for elt in (
-    Float32, Float64, Complex{Float32}, Complex{Float64}
-  )
-    @testset "Basics" begin
-      a = fill(one(elt), 2, 3)
-      @test diaglength(a) == 2
-      a = fill(one(elt))
-      @test diaglength(a) == 1
-    end
-    @testset "Matrix multiplication" begin
-      a1 = DiagonalArray{elt}(undef, (2, 3))
-      a1[1, 1] = 11
-      a1[2, 2] = 22
-      a2 = DiagonalArray{elt}(undef, (3, 4))
-      a2[1, 1] = 11
-      a2[2, 2] = 22
-      a2[3, 3] = 33
-      a_dest = a1 * a2
-      # TODO: Use `densearray` to make generic to GPU.
-      @test Array(a_dest) ≈ Array(a1) * Array(a2)
-      # TODO: Make this work with `ArrayLayouts`.
-      @test stored_length(a_dest) == 2
-      @test a_dest isa DiagonalMatrix{elt}
+using SafeTestsets: @safetestset
+using Suppressor: Suppressor
 
-      # TODO: Make generic to GPU, use `allocate_randn`?
-      a2 = randn(elt, (3, 4))
-      a_dest = a1 * a2
-      # TODO: Use `densearray` to make generic to GPU.
-      @test Array(a_dest) ≈ Array(a1) * Array(a2)
-      @test stored_length(a_dest) == 8
-      @test a_dest isa Matrix{elt}
+# check for filtered groups
+# either via `--group=ALL` or through ENV["GROUP"]
+const pat = r"(?:--group=)(\w+)"
+arg_id = findfirst(contains(pat), ARGS)
+const GROUP = uppercase(
+  if isnothing(arg_id)
+    get(ENV, "GROUP", "ALL")
+  else
+    only(match(pat, ARGS[arg_id]).captures)
+  end,
+)
 
-      a2 = SparseArrayDOK{elt}(3, 4)
-      a2[1, 1] = 11
-      a2[2, 2] = 22
-      a2[3, 3] = 33
-      a_dest = a1 * a2
-      # TODO: Use `densearray` to make generic to GPU.
-      @test Array(a_dest) ≈ Array(a1) * Array(a2)
-      # TODO: Define `SparseMatrixDOK`.
-      # TODO: Make this work with `ArrayLayouts`.
-      @test stored_length(a_dest) == 2
-      @test a_dest isa SparseArrayDOK{elt,2}
+"match files of the form `test_*.jl`, but exclude `*setup*.jl`"
+istestfile(fn) =
+  endswith(fn, ".jl") && startswith(basename(fn), "test_") && !contains(fn, "setup")
+"match files of the form `*.jl`, but exclude `*_notest.jl` and `*setup*.jl`"
+isexamplefile(fn) =
+  endswith(fn, ".jl") && !endswith(fn, "_notest.jl") && !contains(fn, "setup")
+
+@time begin
+  # tests in groups based on folder structure
+  for testgroup in filter(isdir, readdir(@__DIR__))
+    if GROUP == "ALL" || GROUP == uppercase(testgroup)
+      for file in filter(istestfile, readdir(joinpath(@__DIR__, testgroup); join=true))
+        @eval @safetestset $file begin
+          include($file)
+        end
+      end
     end
   end
-end
+
+  # single files in top folder
+  for file in filter(istestfile, readdir(@__DIR__))
+    (file == basename(@__FILE__)) && continue # exclude this file to avoid infinite recursion
+    @eval @safetestset $file begin
+      include($file)
+    end
+  end
+
+  # test examples
+  examplepath = joinpath(@__DIR__, "..", "examples")
+  for (root, _, files) in walkdir(examplepath)
+    contains(chopprefix(root, @__DIR__), "setup") && continue
+    for file in filter(isexamplefile, files)
+      filename = joinpath(root, file)
+      @eval begin
+        @safetestset $file begin
+          $(Expr(
+            :macrocall,
+            GlobalRef(Suppressor, Symbol("@suppress")),
+            LineNumberNode(@__LINE__, @__FILE__),
+            :(include($filename)),
+          ))
+        end
+      end
+    end
+  end
 end
