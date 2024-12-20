@@ -1,6 +1,6 @@
 using Test: @test, @testset, @test_broken
 using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
-using SparseArraysBase: SparseArrayDOK, stored_length
+using SparseArraysBase: SparseArrayDOK, storedlength
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
     Float32, Float64, Complex{Float32}, Complex{Float64}
@@ -23,7 +23,7 @@ using SparseArraysBase: SparseArrayDOK, stored_length
       # TODO: Use `densearray` to make generic to GPU.
       @test Array(a_dest) ≈ Array(a1) * Array(a2)
       # TODO: Make this work with `ArrayLayouts`.
-      @test stored_length(a_dest) == 2
+      @test storedlength(a_dest) == 2
       @test a_dest isa DiagonalMatrix{elt}
 
       # TODO: Make generic to GPU, use `allocate_randn`?
@@ -31,7 +31,7 @@ using SparseArraysBase: SparseArrayDOK, stored_length
       a_dest = a1 * a2
       # TODO: Use `densearray` to make generic to GPU.
       @test Array(a_dest) ≈ Array(a1) * Array(a2)
-      @test stored_length(a_dest) == 8
+      @test storedlength(a_dest) == 8
       @test a_dest isa Matrix{elt}
 
       a2 = SparseArrayDOK{elt}(3, 4)
@@ -43,7 +43,7 @@ using SparseArraysBase: SparseArrayDOK, stored_length
       @test Array(a_dest) ≈ Array(a1) * Array(a2)
       # TODO: Define `SparseMatrixDOK`.
       # TODO: Make this work with `ArrayLayouts`.
-      @test stored_length(a_dest) == 2
+      @test storedlength(a_dest) == 2
       @test a_dest isa SparseArrayDOK{elt,2}
     end
   end

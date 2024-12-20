@@ -1,3 +1,5 @@
+# TODO: Turn these into `@interface ::AbstractDiagonalArrayInterface` functions.
+
 diaglength(a::AbstractArray{<:Any,0}) = 1
 
 function diaglength(a::AbstractArray)
@@ -19,9 +21,42 @@ function diagstride(a::AbstractArray)
   return s
 end
 
+# Iterator over the diagonal cartesian indices.
+# For an AbstractArray `a`, `DiagCartesianIndices(a)` is equivalent
+# to `@view CartesianIndices(a)[diagindices(a)]` but should be
+# faster because it avoids conversions from linear to cartesian indices.
+struct DiagCartesianIndices{N} <: AbstractVector{CartesianIndex{N}}
+  diaglength::Int
+end
+function DiagCartesianIndices(axes::Tuple{Vararg{AbstractUnitRange}})
+  # Check the ranges are one-based.
+  @assert all(isone, first.(axes))
+  return DiagCartesianIndices{length(axes)}(minimum(length.(axes)))
+end
+function DiagCartesianIndices(dims::Tuple{Vararg{Int}})
+  return DiagCartesianIndices(Base.OneTo.(dims))
+end
+function DiagCartesianIndices(a::AbstractArray)
+  return DiagCartesianIndices(axes(a))
+end
+Base.size(I::DiagCartesianIndices) = (I.diaglength,)
+function Base.getindex(I::DiagCartesianIndices{N}, i::Int) where {N}
+  return CartesianIndex(ntuple(Returns(i), N))
+end
+
 function diagindices(a::AbstractArray)
+  return diagindices(IndexStyle(a), a)
+end
+function diagindices(::IndexLinear, a::AbstractArray)
   maxdiag = LinearIndices(a)[CartesianIndex(ntuple(Returns(diaglength(a)), ndims(a)))]
   return 1:diagstride(a):maxdiag
+end
+function diagindices(::IndexCartesian, a::AbstractArray)
+  return DiagCartesianIndices(a)
+  # TODO: Define a special iterator for this, i.e. `DiagCartesianIndices`?
+  return Iterators.map(
+    i -> CartesianIndex(ntuple(Returns(i), ndims(a))), Base.OneTo(diaglength(a))
+  )
 end
 
 function diagindices(a::AbstractArray{<:Any,0})
