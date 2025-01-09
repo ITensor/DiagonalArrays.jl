@@ -88,3 +88,11 @@ function setdiagindices!(a::AbstractArray, v, i::Colon)
   diagview(a) .= v
   return a
 end
+
+"""
+  diagonal(v::AbstractVector) -> AbstractMatrix
+
+Return a diagonal matrix from a vector `v`. This is a replacement of `LinearAlgebra.Diagonal`
+that does not imply an output type. Defaults to `Diagonal(v)`.
+"""
+diagonal(A::AbstractVector) = LinearAlgebra.Diagonal(A)
