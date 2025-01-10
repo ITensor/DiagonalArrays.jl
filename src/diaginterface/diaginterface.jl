@@ -92,9 +92,19 @@ function setdiagindices!(a::AbstractArray, v, i::Colon)
 end
 
 """
-    diagonal(v::AbstractVector) -> AbstractMatrix
+    diagonal(v::AbstractVector, [axes]) -> AbstractMatrix
 
-Return a diagonal matrix from a vector `v`. This is a replacement of `LinearAlgebra.Diagonal`
-that does not imply an output type. Defaults to `Diagonal(v)`.
+Return a diagonal matrix from a vector `v`, optionally providing the `axes` of the resulting matrix.
+This is an extension of `LinearAlgebra.Diagonal`, designed to avoid the implication of the output type,
+as well as allowing the option of specifying the `axes`.
+Defaults to `Diagonal(v)`.
 """
-diagonal(A::AbstractVector) = LinearAlgebra.Diagonal(A)
+function diagonal(v::AbstractVector)
+  ax = axes(v, 1) # Base.axes1 is private
+  return diagonal(v, (ax, ax))
+end
+function diagonal(v::AbstractVector, ax)
+  vax = axes(v, 1)
+  ax == (vax, vax) || throw(ArgumentError(lazy"Cannot create a `Diagonal` with axes $ax"))
+  return LinearAlgebra.Diagonal(v)
+end
