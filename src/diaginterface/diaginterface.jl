@@ -1,5 +1,7 @@
 # TODO: Turn these into `@interface ::AbstractDiagonalArrayInterface` functions.
 
+using LinearAlgebra: LinearAlgebra
+
 diaglength(a::AbstractArray{<:Any,0}) = 1
 
 function diaglength(a::AbstractArray)
