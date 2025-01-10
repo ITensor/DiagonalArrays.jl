@@ -1,6 +1,8 @@
-using Test: @test, @testset, @test_broken
-using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength
+using Test: @test, @testset, @test_broken, @inferred
+using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength, diagonal
 using SparseArraysBase: SparseArrayDOK, storedlength
+using LinearAlgebra: Diagonal
+
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
     Float32, Float64, Complex{Float32}, Complex{Float64}
@@ -45,6 +47,10 @@ using SparseArraysBase: SparseArrayDOK, storedlength
       # TODO: Make this work with `ArrayLayouts`.
       @test storedlength(a_dest) == 2
       @test a_dest isa SparseArrayDOK{elt,2}
+    end
+    @testset "diagonal" begin
+      @test @inferred(diagonal(rand(2))) isa AbstractMatrix
+      @test diagonal(zeros(Int, 2)) isa Diagonal
     end
   end
 end
