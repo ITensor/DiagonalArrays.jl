@@ -1,5 +1,7 @@
 # TODO: Turn these into `@interface ::AbstractDiagonalArrayInterface` functions.
 
+using LinearAlgebra: LinearAlgebra
+
 diaglength(a::AbstractArray{<:Any,0}) = 1
 
 function diaglength(a::AbstractArray)
@@ -88,3 +90,12 @@ function setdiagindices!(a::AbstractArray, v, i::Colon)
   diagview(a) .= v
   return a
 end
+
+"""
+    diagonal(v::AbstractVector) -> AbstractMatrix
+
+Return a diagonal matrix from a vector `v`.
+This is an extension of `LinearAlgebra.Diagonal`, designed to avoid the implication of the output type.
+Defaults to `Diagonal(v)`.
+"""
+diagonal(v::AbstractVector) = LinearAlgebra.Diagonal(v)
