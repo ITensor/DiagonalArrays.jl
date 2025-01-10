@@ -2,7 +2,7 @@
 
 diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)}))
 
-using Derive: Derive, @interface
+using DerivableInterfaces: DerivableInterfaces, @interface
 using SparseArraysBase:
   SparseArraysBase, AbstractSparseArrayInterface, AbstractSparseArrayStyle ## , StorageIndex, StorageIndices
 
@@ -10,12 +10,16 @@ abstract type AbstractDiagonalArrayInterface <: AbstractSparseArrayInterface end
 
 struct DiagonalArrayInterface <: AbstractDiagonalArrayInterface end
 
-Derive.arraytype(::AbstractDiagonalArrayInterface, elt::Type) = DiagonalArray{elt}
-Derive.interface(::Type{<:AbstractDiagonalArray}) = DiagonalArrayInterface()
+function DerivableInterfaces.arraytype(::AbstractDiagonalArrayInterface, elt::Type)
+  return DiagonalArray{elt}
+end
+DerivableInterfaces.interface(::Type{<:AbstractDiagonalArray}) = DiagonalArrayInterface()
 
 abstract type AbstractDiagonalArrayStyle{N} <: AbstractSparseArrayStyle{N} end
 
-Derive.interface(::Type{<:AbstractDiagonalArrayStyle}) = DiagonalArrayInterface()
+function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArrayStyle})
+  return DiagonalArrayInterface()
+end
 
 struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
 
