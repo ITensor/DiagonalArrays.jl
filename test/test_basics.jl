@@ -57,9 +57,13 @@ using LinearAlgebra: Diagonal
     @testset "delta" begin
       for (a, elt′) in (
         (delta(2, 3), Float64),
+        (δ(2, 3), Float64),
         (delta((2, 3)), Float64),
+        (δ((2, 3)), Float64),
         (delta(Bool, 2, 3), Bool),
+        (δ(Bool, 2, 3), Bool),
         (delta(Bool, (2, 3)), Bool),
+        (δ(Bool, (2, 3)), Bool),
       )
         @test eltype(a) === elt′
         @test diaglength(a) == 2
@@ -73,6 +77,8 @@ using LinearAlgebra: Diagonal
 
         a′ = 2a
         @test diagview(a′) == 2ones(2)
+        # TODO: Fix this. Mapping doesn't preserve
+        # the diagonal structure properly.
         @test_broken diagview(a′) isa Fill
 
         b = randn(elt, (3, 4))
