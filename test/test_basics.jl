@@ -1,5 +1,7 @@
 using Test: @test, @testset, @test_broken, @inferred
-using DiagonalArrays: DiagonalArrays, DiagonalArray, DiagonalMatrix, diaglength, diagonal
+using DiagonalArrays:
+  DiagonalArrays, DiagonalArray, DiagonalMatrix, δ, delta, diaglength, diagonal, diagview
+using FillArrays: Fill, Ones
 using SparseArraysBase: SparseArrayDOK, storedlength
 using LinearAlgebra: Diagonal
 
@@ -51,6 +53,32 @@ using LinearAlgebra: Diagonal
     @testset "diagonal" begin
       @test @inferred(diagonal(rand(2))) isa AbstractMatrix
       @test diagonal(zeros(Int, 2)) isa Diagonal
+    end
+    @testset "delta" begin
+      for (a, elt′) in (
+        (delta(2, 3), Float64),
+        (delta((2, 3)), Float64),
+        (delta(Bool, 2, 3), Bool),
+        (delta(Bool, (2, 3)), Bool),
+      )
+        @test eltype(a) === elt′
+        @test diaglength(a) == 2
+        @test a isa DiagonalArray{elt′}
+        @test size(a) == (2, 3)
+        @test diaglength(a) == 2
+        @test storedlength(a) == 2
+        @test a == DiagonalArray(ones(2), (2, 3))
+        @test diagview(a) == ones(2)
+        @test diagview(a) isa Ones{elt′}
+
+        a′ = 2a
+        @test diagview(a′) == 2ones(2)
+        @test_broken diagview(a′) isa Fill
+
+        b = randn(elt, (3, 4))
+        a_dest = a * b
+        @test a_dest ≈ Array(a) * Array(b)
+      end
     end
   end
 end
