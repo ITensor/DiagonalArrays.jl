@@ -79,6 +79,7 @@ using LinearAlgebra: Diagonal
         @test diagview(a′) == 2ones(2)
         # TODO: Fix this. Mapping doesn't preserve
         # the diagonal structure properly.
+        # https://github.com/ITensor/DiagonalArrays.jl/issues/7
         @test_broken diagview(a′) isa Fill
 
         b = randn(elt, (3, 4))
