@@ -2,7 +2,7 @@ using Test: @test, @testset, @test_broken, @inferred
 using DiagonalArrays:
   DiagonalArrays, DiagonalArray, DiagonalMatrix, δ, delta, diaglength, diagonal, diagview
 using FillArrays: Fill, Ones
-using SparseArraysBase: SparseArrayDOK, storedlength
+using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
 using LinearAlgebra: Diagonal
 
 @testset "Test DiagonalArrays" begin
@@ -38,7 +38,7 @@ using LinearAlgebra: Diagonal
       @test storedlength(a_dest) == 8
       @test a_dest isa Matrix{elt}
 
-      a2 = SparseArrayDOK{elt}(3, 4)
+      a2 = sparsezeros(elt, (3, 4))
       a2[1, 1] = 11
       a2[2, 2] = 22
       a2[3, 3] = 33
