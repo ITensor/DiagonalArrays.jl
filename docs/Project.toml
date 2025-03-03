@@ -5,5 +5,5 @@ Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 
 [compat]
 DiagonalArrays = "0.2"
-Documenter = "0.1"
+Documenter = "1"
 Literate = "2"
