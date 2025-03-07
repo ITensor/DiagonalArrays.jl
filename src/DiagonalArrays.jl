@@ -1,6 +1,5 @@
 module DiagonalArrays
 
-include("diaginterface/defaults.jl")
 include("diaginterface/diaginterface.jl")
 include("diaginterface/diagindex.jl")
 include("diaginterface/diagindices.jl")

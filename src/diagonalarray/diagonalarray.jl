@@ -1,4 +1,6 @@
-using SparseArraysBase: SparseArraysBase, SparseArrayDOK, default_getunstoredindex ## , Zero, getindex_zero_function
+function getzero(a::AbstractArray{<:Any,N}, I::Vararg{Int,N}) where {N}
+  return zero(eltype(a))
+end
 
 struct DiagonalArray{T,N,Diag<:AbstractVector{T},F} <: AbstractDiagonalArray{T,N}
   diag::Diag
@@ -7,15 +9,13 @@ struct DiagonalArray{T,N,Diag<:AbstractVector{T},F} <: AbstractDiagonalArray{T,N
 end
 
 function DiagonalArray{T,N}(
-  diag::AbstractVector{T},
-  d::Tuple{Vararg{Int,N}},
-  getunstoredindex=default_getunstoredindex,
+  diag::AbstractVector{T}, d::Tuple{Vararg{Int,N}}, getunstoredindex=getzero
 ) where {T,N}
   return DiagonalArray{T,N,typeof(diag),typeof(getunstoredindex)}(diag, d, getunstoredindex)
 end
 
 function DiagonalArray{T,N}(
-  diag::AbstractVector, d::Tuple{Vararg{Int,N}}, getunstoredindex=default_getunstoredindex
+  diag::AbstractVector, d::Tuple{Vararg{Int,N}}, getunstoredindex=getzero
 ) where {T,N}
   return DiagonalArray{T,N}(T.(diag), d, getunstoredindex)
 end
@@ -25,7 +25,7 @@ function DiagonalArray{T,N}(diag::AbstractVector, d::Vararg{Int,N}) where {T,N}
 end
 
 function DiagonalArray{T}(
-  diag::AbstractVector, d::Tuple{Vararg{Int,N}}, getunstoredindex=default_getunstoredindex
+  diag::AbstractVector, d::Tuple{Vararg{Int,N}}, getunstoredindex=getzero
 ) where {T,N}
   return DiagonalArray{T,N}(diag, d, getunstoredindex)
 end
@@ -44,7 +44,7 @@ end
 
 # Infer size from diagonal
 function DiagonalArray{T,N}(diag::AbstractVector) where {T,N}
-  return DiagonalArray{T,N}(diag, default_size(diag, N))
+  return DiagonalArray{T,N}(diag, ntuple(Returns(length(diag)), N))
 end
 
 function DiagonalArray{<:Any,N}(diag::AbstractVector{T}) where {T,N}
@@ -53,7 +53,7 @@ end
 
 # undef
 function DiagonalArray{T,N}(
-  ::UndefInitializer, d::Tuple{Vararg{Int,N}}, getunstoredindex=default_getunstoredindex
+  ::UndefInitializer, d::Tuple{Vararg{Int,N}}, getunstoredindex=getzero
 ) where {T,N}
   return DiagonalArray{T,N}(Vector{T}(undef, minimum(d)), d, getunstoredindex)
 end
@@ -63,16 +63,14 @@ function DiagonalArray{T,N}(::UndefInitializer, d::Vararg{Int,N}) where {T,N}
 end
 
 function DiagonalArray{T}(
-  ::UndefInitializer, d::Tuple{Vararg{Int,N}}, getunstoredindex=default_getunstoredindex
+  ::UndefInitializer, d::Tuple{Vararg{Int,N}}, getunstoredindex=getzero
 ) where {T,N}
   return DiagonalArray{T,N}(undef, d, getunstoredindex)
 end
 
 # Axes version
 function DiagonalArray{T}(
-  ::UndefInitializer,
-  axes::Tuple{Vararg{AbstractUnitRange,N}},
-  getunstoredindex=default_getunstoredindex,
+  ::UndefInitializer, axes::Tuple{Vararg{AbstractUnitRange,N}}, getunstoredindex=getzero
 ) where {T,N}
   @assert all(isone, first.(axes))
   return DiagonalArray{T,N}(undef, length.(axes), getunstoredindex)
