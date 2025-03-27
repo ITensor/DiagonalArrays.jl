@@ -10,11 +10,11 @@ makedocs(;
   authors="ITensor developers <support@itensor.org> and contributors",
   sitename="DiagonalArrays.jl",
   format=Documenter.HTML(;
-    canonical="https://ITensor.github.io/DiagonalArrays.jl",
+    canonical="https://itensor.github.io/DiagonalArrays.jl",
     edit_link="main",
-    assets=String[],
+    assets=["assets/favicon.ico", "assets/extras.css"],
   ),
-  pages=["Home" => "index.md", "Library" => "library.md"],
+  pages=["Home" => "index.md", "Reference" => "reference.md"],
 )
 
 deploydocs(;
