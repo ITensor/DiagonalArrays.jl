@@ -30,13 +30,16 @@ end
 struct DiagCartesianIndices{N} <: AbstractVector{CartesianIndex{N}}
   diaglength::Int
 end
-function DiagCartesianIndices(axes::Tuple{Vararg{AbstractUnitRange}})
+function DiagCartesianIndices(axes::Tuple{AbstractUnitRange,Vararg{AbstractUnitRange}})
   # Check the ranges are one-based.
   @assert all(isone, first.(axes))
   return DiagCartesianIndices{length(axes)}(minimum(length.(axes)))
 end
-function DiagCartesianIndices(dims::Tuple{Vararg{Int}})
+function DiagCartesianIndices(dims::Tuple{Int,Vararg{Int}})
   return DiagCartesianIndices(Base.OneTo.(dims))
+end
+function DiagCartesianIndices(dims::Tuple{})
+  return DiagCartesianIndices{0}(0)
 end
 function DiagCartesianIndices(a::AbstractArray)
   return DiagCartesianIndices(axes(a))
@@ -50,6 +53,9 @@ function diagindices(a::AbstractArray)
   return diagindices(IndexStyle(a), a)
 end
 function diagindices(::IndexLinear, a::AbstractArray)
+  if isempty(a)
+    return 1:diagstride(a):0
+  end
   maxdiag = LinearIndices(a)[CartesianIndex(ntuple(Returns(diaglength(a)), ndims(a)))]
   return 1:diagstride(a):maxdiag
 end
