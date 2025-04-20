@@ -1,6 +1,14 @@
 using Test: @test, @testset, @test_broken, @inferred
 using DiagonalArrays:
-  DiagonalArrays, DiagonalArray, DiagonalMatrix, δ, delta, diaglength, diagonal, diagview
+  DiagonalArrays,
+  DiagonalArray,
+  DiagonalMatrix,
+  δ,
+  delta,
+  diagindices,
+  diaglength,
+  diagonal,
+  diagview
 using FillArrays: Fill, Ones
 using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
 using LinearAlgebra: Diagonal
@@ -14,6 +22,51 @@ using LinearAlgebra: Diagonal
       @test diaglength(a) == 2
       a = fill(one(elt))
       @test diaglength(a) == 1
+    end
+    @testset "diagindices" begin
+      a = randn(elt, ())
+      @test diagindices(a) == diagindices(IndexLinear(), a) == 1:1:1
+      @test isempty(diagindices(IndexCartesian(), a))
+
+      for a in (
+        randn(elt, (0,)),
+        randn(elt, (0, 0)),
+        randn(elt, (0, 3)),
+        randn(elt, (3, 0)),
+        randn(elt, (0, 0, 0)),
+        randn(elt, (3, 3, 0)),
+      )
+        @test diagindices(a) == diagindices(IndexLinear(), a) == 1:1:0
+        @test isempty(diagindices(IndexCartesian(), a))
+      end
+
+      a = randn(elt, (3,))
+      @test diagindices(a) == diagindices(IndexLinear(), a) == 1:1:3
+      @test diagindices(IndexCartesian(), a) == CartesianIndex.(1:3)
+
+      a = randn(elt, (4,))
+      @test diagindices(a) == diagindices(IndexLinear(), a) == 1:1:4
+      @test diagindices(IndexCartesian(), a) == CartesianIndex.(1:4)
+
+      for a in (randn(elt, (3, 3)), randn(elt, (3, 4)))
+        @test diagindices(a) == diagindices(IndexLinear(), a) == 1:4:9
+        @test diagindices(IndexCartesian(), a) == CartesianIndex.(Iterators.zip(1:3, 1:3))
+      end
+
+      a = randn(elt, (4, 3))
+      @test diagindices(a) == diagindices(IndexLinear(), a) == 1:5:11
+      @test diagindices(IndexCartesian(), a) == CartesianIndex.(Iterators.zip(1:3, 1:3))
+
+      for a in (randn(elt, (3, 3, 3)), randn(elt, (3, 3, 4)))
+        @test diagindices(a) == diagindices(IndexLinear(), a) == 1:13:27
+        @test diagindices(IndexCartesian(), a) ==
+          CartesianIndex.(Iterators.zip(1:3, 1:3, 1:3))
+      end
+
+      a = randn(elt, (3, 4, 3))
+      @test diagindices(a) == diagindices(IndexLinear(), a) == 1:16:33
+      @test diagindices(IndexCartesian(), a) ==
+        CartesianIndex.(Iterators.zip(1:3, 1:3, 1:3))
     end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))
