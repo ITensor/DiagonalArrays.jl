@@ -8,7 +8,7 @@ function diaglength(a::AbstractArray)
   return minimum(size(a))
 end
 
-function isdiagindex(a::AbstractArray{<:Any,N}, I::CartesianIndex{N}) where {N}
+@inline function isdiagindex(a::AbstractArray{<:Any,N}, I::CartesianIndex{N}) where {N}
   @boundscheck checkbounds(a, I)
   return allequal(Tuple(I))
 end
@@ -49,22 +49,31 @@ function Base.getindex(I::DiagCartesianIndices{N}, i::Int) where {N}
   return CartesianIndex(ntuple(Returns(i), N))
 end
 
+function checkdiagbounds(::Type{Bool}, a::AbstractArray, i::Integer)
+  Base.require_one_based_indexing(a)
+  return i ∈ 1:diaglength(a)
+end
+function checkdiagbounds(a::AbstractArray, i::Integer)
+  checkdiagbounds(Bool, a, i) || throw(BoundsError(a, ntuple(Returns(i), ndims(a))))
+  return nothing
+end
+
+# Convert a linear index along the diagonal to the corresponding
+# CartesianIndex.
+@inline function diagindex(a::AbstractArray, i::Integer)
+  @boundscheck checkdiagbounds(a, i)
+  return CartesianIndex(ntuple(Returns(i), ndims(a)))
+end
+
 function diagindices(a::AbstractArray)
   return diagindices(IndexStyle(a), a)
 end
 function diagindices(::IndexLinear, a::AbstractArray)
-  if isempty(a)
-    return 1:diagstride(a):0
-  end
-  maxdiag = LinearIndices(a)[CartesianIndex(ntuple(Returns(diaglength(a)), ndims(a)))]
+  maxdiag = isempty(a) ? 0 : @inbounds LinearIndices(a)[diagindex(a, diaglength(a))]
   return 1:diagstride(a):maxdiag
 end
 function diagindices(::IndexCartesian, a::AbstractArray)
   return DiagCartesianIndices(a)
-  # TODO: Define a special iterator for this, i.e. `DiagCartesianIndices`?
-  return Iterators.map(
-    i -> CartesianIndex(ntuple(Returns(i), ndims(a))), Base.OneTo(diaglength(a))
-  )
 end
 
 function diagindices(a::AbstractArray{<:Any,0})
