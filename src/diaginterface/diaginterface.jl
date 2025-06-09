@@ -84,6 +84,9 @@ function diagview(a::AbstractArray)
   return @view a[diagindices(a)]
 end
 
+using LinearAlgebra: Diagonal
+diagview(a::Diagonal) = a.diag
+
 function getdiagindex(a::AbstractArray, i::Integer)
   return diagview(a)[i]
 end
@@ -110,7 +113,36 @@ end
     diagonal(v::AbstractVector) -> AbstractMatrix
 
 Return a diagonal matrix from a vector `v`.
-This is an extension of `LinearAlgebra.Diagonal`, designed to avoid the implication of the output type.
+This is an extension of `LinearAlgebra.Diagonal`, designed to avoid
+the implication of the output type.
 Defaults to `Diagonal(v)`.
 """
 diagonal(v::AbstractVector) = LinearAlgebra.Diagonal(v)
+
+"""
+    diagonal(m::AbstractMatrix) -> AbstractMatrix
+
+Return a diagonal matrix from a matrix `m` where the diagonal
+values are copied from the diagonal of `m`.
+This is an extension of `LinearAlgebra.Diagonal`, designed to avoid
+the implication of the output type.
+Defaults to `diagonal(copy(diagview(m)))`, which in general is
+equivalent to `Diagonal(m)`.
+"""
+diagonal(m::AbstractMatrix) = diagonal(copy(diagview(m)))
+
+"""
+    diagonaltype(::AbstractVector) -> Type{<:AbstractMatrix}
+    diagonaltype(::Type{<:AbstractVector}) -> Type{<:AbstractMatrix}
+    diagonaltype(::AbstractMatrix) -> Type{<:AbstractMatrix}
+    diagonaltype(::Type{<:AbstractMatrix}) -> Type{<:AbstractMatrix}
+
+Return the type of diagonal matrix that would be created from a vector or matrix
+using the [`diagonal`](@ref) function.
+"""
+diagonaltype
+
+diagonaltype(v::AbstractVector) = diagonaltype(typeof(v))
+diagonaltype(V::Type{<:AbstractVector}) = Base.promote_op(diagonal, V)
+diagonaltype(m::AbstractMatrix) = diagonaltype(typeof(m))
+diagonaltype(M::Type{<:AbstractMatrix}) = Base.promote_op(diagonal, M)
