@@ -8,6 +8,7 @@ using DiagonalArrays:
   diagindices,
   diaglength,
   diagonal,
+  diagonaltype,
   diagview
 using FillArrays: Fill, Ones
 using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
@@ -104,8 +105,17 @@ using LinearAlgebra: Diagonal
       @test a_dest isa SparseArrayDOK{elt,2}
     end
     @testset "diagonal" begin
-      @test @inferred(diagonal(rand(2))) isa AbstractMatrix
-      @test diagonal(zeros(Int, 2)) isa Diagonal
+      v = randn(2)
+      d = @inferred diagonal(v)
+      @test d isa Diagonal{eltype(v)}
+      @test diagview(d) === v
+      @test diagonaltype(v) === typeof(d)
+
+      a = randn(2, 2)
+      d = @inferred diagonal(a)
+      @test d isa Diagonal{eltype(v)}
+      @test diagview(d) == diagview(a)
+      @test diagonaltype(a) === typeof(d)
     end
     @testset "delta" begin
       for (a, elt′) in (
