@@ -4,21 +4,26 @@ diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)
 
 using DerivableInterfaces: DerivableInterfaces, @interface
 using SparseArraysBase:
-  SparseArraysBase, AbstractSparseArrayInterface, AbstractSparseArrayStyle ## , StorageIndex, StorageIndices
+  SparseArraysBase, AbstractSparseArrayInterface, AbstractSparseArrayStyle
 
-abstract type AbstractDiagonalArrayInterface <: AbstractSparseArrayInterface end
+abstract type AbstractDiagonalArrayInterface{N} <: AbstractSparseArrayInterface{N} end
 
-struct DiagonalArrayInterface <: AbstractDiagonalArrayInterface end
+struct DiagonalArrayInterface{N} <: AbstractDiagonalArrayInterface{N} end
+DiagonalArrayInterface{M}(::Val{N}) where {M,N} = DiagonalArrayInterface{N}()
+DiagionalArrayInterface(::Val{N}) where {N} = DiagonalArrayInterface{N}()
+DiagonalArrayInterface() = DiagonalArrayInterface{Any}()
 
-function DerivableInterfaces.arraytype(::AbstractDiagonalArrayInterface, elt::Type)
-  return DiagonalArray{elt}
+function Base.similar(::AbstractDiagonalArrayInterface, elt::Type, ax::Tuple)
+  return similar(DiagonalArray{elt}, ax)
 end
-DerivableInterfaces.interface(::Type{<:AbstractDiagonalArray}) = DiagonalArrayInterface()
+function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArray{<:Any,N}}) where {N}
+  return DiagonalArrayInterface{N}()
+end
 
 abstract type AbstractDiagonalArrayStyle{N} <: AbstractSparseArrayStyle{N} end
 
-function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArrayStyle})
-  return DiagonalArrayInterface()
+function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArrayStyle{N}}) where {N}
+  return DiagonalArrayInterface{N}()
 end
 
 struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
