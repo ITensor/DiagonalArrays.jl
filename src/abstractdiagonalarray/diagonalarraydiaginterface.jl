@@ -56,7 +56,7 @@ function SparseArraysBase.setstoredindex!(
   setdiagindex!(a, value, first(I))
   return a
 end
-function SparseArraysBase.eachstoredindex(a::AbstractDiagonalArray)
+function SparseArraysBase.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)
   return diagindices(a)
 end
 
