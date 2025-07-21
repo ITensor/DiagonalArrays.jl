@@ -1,5 +1,5 @@
 using FillArrays: Zeros
-using SparseArraysBase: Unstored
+using SparseArraysBase: Unstored, unstored
 
 function _DiagonalArray end
 
@@ -91,7 +91,7 @@ function DiagonalArray{T}(::UndefInitializer, axes::NTuple{N,Base.OneTo{Int}}) w
   return DiagonalArray{T,N}(undef, length.(axes))
 end
 
-function SparseArraysBase.similar_sparsearray(a::DiagonalArray, unstored::Unstored)
+function Base.similar(a::DiagonalArray, unstored::Unstored)
   return DiagonalArray(undef, unstored)
 end
 
