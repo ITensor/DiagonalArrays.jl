@@ -79,7 +79,7 @@ function DiagonalArray{T}(
   ::UndefInitializer,
   ax1::AbstractUnitRange{<:Integer},
   axs::AbstractUnitRange{<:Integer}...,
-) where {T,N}
+) where {T}
   return DiagonalArray{T}(undef, (ax1, axs...))
 end
 
