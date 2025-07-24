@@ -27,19 +27,6 @@ function DiagonalArray(::UndefInitializer, unstored::Unstored)
 end
 
 # Constructors accepting axes.
-function DiagonalArray(
-  diag::AbstractVector{T},
-  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
-) where {T}
-  return DiagonalArray{T,length(ax)}(diag, ax)
-end
-function DiagonalArray(
-  diag::AbstractVector,
-  ax1::AbstractUnitRange{<:Integer},
-  axs::AbstractUnitRange{<:Integer}...,
-)
-  return DiagonalArray(diag, (ax1, axs...))
-end
 function DiagonalArray{T,N}(
   diag::AbstractVector,
   ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
@@ -53,6 +40,32 @@ function DiagonalArray{T,N}(
   axs::AbstractUnitRange{<:Integer}...,
 ) where {T,N}
   return DiagonalArray{T,N}(diag, (ax1, axs...))
+end
+function DiagonalArray{T}(
+  diag::AbstractVector,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T}
+  return DiagonalArray{T,length(ax)}(diag, ax)
+end
+function DiagonalArray{T}(
+  diag::AbstractVector,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+) where {T}
+  return DiagonalArray{T}(diag, (ax1, axs...))
+end
+function DiagonalArray(
+  diag::AbstractVector{T},
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T}
+  return DiagonalArray{T,length(ax)}(diag, ax)
+end
+function DiagonalArray(
+  diag::AbstractVector,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+)
+  return DiagonalArray(diag, (ax1, axs...))
 end
 
 # undef constructors accepting axes.
