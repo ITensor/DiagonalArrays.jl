@@ -21,11 +21,66 @@ Base.size(a::DiagonalArray) = size(unstored(a))
 Base.axes(a::DiagonalArray) = axes(unstored(a))
 
 function DiagonalArray(::UndefInitializer, unstored::Unstored)
-  return _DiagonalArray(Vector{eltype(unstored)}(undef, ndims(unstored)), parent(unstored))
+  return _DiagonalArray(
+    Vector{eltype(unstored)}(undef, minimum(size(unstored))), parent(unstored)
+  )
 end
 
-function DiagonalArray{T,N}(diag::AbstractVector, unstored::AbstractArray) where {T,N}
-  return _DiagonalArray(convert(AbstractVector{T}, diag), dims, getunstored)
+# Constructors accepting axes.
+function DiagonalArray(
+  diag::AbstractVector{T},
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T}
+  return DiagonalArray{T,length(ax)}(diag, ax)
+end
+function DiagonalArray(
+  diag::AbstractVector,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+)
+  return DiagonalArray(diag, (ax1, axs...))
+end
+function DiagonalArray{T,N}(
+  diag::AbstractVector,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T,N}
+  N == length(ax) || throw(ArgumentError("Wrong number of axes"))
+  return _DiagonalArray(convert(AbstractVector{T}, diag), Zeros{T}(ax))
+end
+function DiagonalArray{T,N}(
+  diag::AbstractVector,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+) where {T,N}
+  return DiagonalArray{T,N}(diag, (ax1, axs...))
+end
+
+# undef constructors accepting axes.
+function DiagonalArray{T,N}(
+  ::UndefInitializer,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T,N}
+  return DiagonalArray{T,N}(Vector{T}(undef, minimum(length, ax)), ax)
+end
+function DiagonalArray{T,N}(
+  ::UndefInitializer,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+) where {T,N}
+  return DiagonalArray{T,N}(undef, (ax1, axs...))
+end
+function DiagonalArray{T}(
+  ::UndefInitializer,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T}
+  return DiagonalArray{T,length(ax)}(undef, ax)
+end
+function DiagonalArray{T}(
+  ::UndefInitializer,
+  ax1::AbstractUnitRange{<:Integer},
+  axs::AbstractUnitRange{<:Integer}...,
+) where {T,N}
+  return DiagonalArray{T}(undef, (ax1, axs...))
 end
 
 function DiagonalArray{T,N}(diag::AbstractVector, dims::Dims{N}) where {T,N}
