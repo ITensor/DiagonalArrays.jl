@@ -69,6 +69,38 @@ using LinearAlgebra: Diagonal
       @test diagindices(IndexCartesian(), a) ==
         CartesianIndex.(Iterators.zip(1:3, 1:3, 1:3))
     end
+    @testset "DiagonalArray constructors" begin
+      v = randn(elt, 2)
+      @test DiagonalArray(v, 2, 2) ≡
+        DiagonalArray(v, (2, 2)) ≡
+        DiagonalArray(v, Base.OneTo(2), Base.OneTo(2)) ≡
+        DiagonalArray(v, (Base.OneTo(2), Base.OneTo(2))) ≡
+        DiagonalArray{elt}(v, 2, 2) ≡
+        DiagonalArray{elt}(v, (2, 2)) ≡
+        DiagonalArray{elt}(v, Base.OneTo(2), Base.OneTo(2)) ≡
+        DiagonalArray{elt}(v, (Base.OneTo(2), Base.OneTo(2))) ≡
+        DiagonalArray{elt,2}(v, 2, 2) ≡
+        DiagonalArray{elt,2}(v, (2, 2)) ≡
+        DiagonalArray{elt,2}(v, Base.OneTo(2), Base.OneTo(2)) ≡
+        DiagonalArray{elt,2}(v, (Base.OneTo(2), Base.OneTo(2)))
+      @test size(DiagonalArray{elt}(undef, 2, 2)) ≡
+        size(DiagonalArray{elt}(undef, (2, 2))) ≡
+        size(DiagonalArray{elt}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
+        size(DiagonalArray{elt}(undef, (Base.OneTo(2), Base.OneTo(2)))) ≡
+        size(DiagonalArray{elt,2}(undef, 2, 2)) ≡
+        size(DiagonalArray{elt,2}(undef, (2, 2))) ≡
+        size(DiagonalArray{elt,2}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
+        size(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
+      @test elt ≡
+        eltype(DiagonalArray{elt}(undef, 2, 2)) ≡
+        eltype(DiagonalArray{elt}(undef, (2, 2))) ≡
+        eltype(DiagonalArray{elt}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
+        eltype(DiagonalArray{elt}(undef, (Base.OneTo(2), Base.OneTo(2)))) ≡
+        eltype(DiagonalArray{elt,2}(undef, 2, 2)) ≡
+        eltype(DiagonalArray{elt,2}(undef, (2, 2))) ≡
+        eltype(DiagonalArray{elt,2}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
+        eltype(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
+    end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))
       a1[1, 1] = 11
@@ -120,13 +152,21 @@ using LinearAlgebra: Diagonal
     @testset "delta" begin
       for (a, elt′) in (
         (delta(2, 3), Float64),
+        (delta(Base.OneTo(2), Base.OneTo(3)), Float64),
         (δ(2, 3), Float64),
+        (δ(Base.OneTo(2), Base.OneTo(3)), Float64),
         (delta((2, 3)), Float64),
+        (delta(Base.OneTo.((2, 3))), Float64),
         (δ((2, 3)), Float64),
+        (δ(Base.OneTo.((2, 3))), Float64),
         (delta(Bool, 2, 3), Bool),
+        (delta(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
         (δ(Bool, 2, 3), Bool),
+        (δ(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
         (delta(Bool, (2, 3)), Bool),
+        (delta(Bool, Base.OneTo.((2, 3))), Bool),
         (δ(Bool, (2, 3)), Bool),
+        (δ(Bool, Base.OneTo.((2, 3))), Bool),
       )
         @test eltype(a) === elt′
         @test diaglength(a) == 2
