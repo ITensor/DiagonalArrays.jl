@@ -1,6 +1,7 @@
 using Test: @test, @testset, @test_broken, @inferred
 using DiagonalArrays:
   DiagonalArrays,
+  Delta,
   DiagonalArray,
   DiagonalMatrix,
   δ,
@@ -151,30 +152,33 @@ using LinearAlgebra: Diagonal
     end
     @testset "delta" begin
       for (a, elt′) in (
-        (delta(2, 3), Float64),
-        (delta(Base.OneTo(2), Base.OneTo(3)), Float64),
-        (δ(2, 3), Float64),
-        (δ(Base.OneTo(2), Base.OneTo(3)), Float64),
-        (delta((2, 3)), Float64),
-        (delta(Base.OneTo.((2, 3))), Float64),
-        (δ((2, 3)), Float64),
-        (δ(Base.OneTo.((2, 3))), Float64),
-        (delta(Bool, 2, 3), Bool),
-        (delta(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
-        (δ(Bool, 2, 3), Bool),
-        (δ(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
-        (delta(Bool, (2, 3)), Bool),
-        (delta(Bool, Base.OneTo.((2, 3))), Bool),
-        (δ(Bool, (2, 3)), Bool),
-        (δ(Bool, Base.OneTo.((2, 3))), Bool),
+        (delta(2, 2), Float64),
+        (delta(Base.OneTo(2), Base.OneTo(2)), Float64),
+        (δ(2, 2), Float64),
+        (δ(Base.OneTo(2), Base.OneTo(2)), Float64),
+        (delta((2, 2)), Float64),
+        (delta(Base.OneTo.((2, 2))), Float64),
+        (δ((2, 2)), Float64),
+        (δ(Base.OneTo.((2, 2))), Float64),
+        (delta(Bool, 2, 2), Bool),
+        (delta(Bool, Base.OneTo(2), Base.OneTo(2)), Bool),
+        (Delta{Bool}((2, 2)), Bool),
+        (Delta{Bool}(Base.OneTo.((2, 2))), Bool),
+        (δ(Bool, 2, 2), Bool),
+        (δ(Bool, Base.OneTo(2), Base.OneTo(2)), Bool),
+        (delta(Bool, (2, 2)), Bool),
+        (delta(Bool, Base.OneTo.((2, 2))), Bool),
+        (δ(Bool, (2, 2)), Bool),
+        (δ(Bool, Base.OneTo.((2, 2))), Bool),
       )
         @test eltype(a) === elt′
         @test diaglength(a) == 2
-        @test a isa DiagonalArray{elt′}
-        @test size(a) == (2, 3)
+        @test a isa DiagonalArray{elt′,2}
+        @test a isa Delta{elt′,2}
+        @test size(a) == (2, 2)
         @test diaglength(a) == 2
         @test storedlength(a) == 2
-        @test a == DiagonalArray(ones(2), (2, 3))
+        @test a == DiagonalArray(ones(2), (2, 2))
         @test diagview(a) == ones(2)
         @test diagview(a) isa Ones{elt′}
 
@@ -185,7 +189,7 @@ using LinearAlgebra: Diagonal
         # https://github.com/ITensor/DiagonalArrays.jl/issues/7
         @test_broken diagview(a′) isa Fill
 
-        b = randn(elt, (3, 4))
+        b = randn(elt, (2, 3))
         a_dest = a * b
         @test a_dest ≈ Array(a) * Array(b)
       end

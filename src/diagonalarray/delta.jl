@@ -1,9 +1,34 @@
-using FillArrays: Ones
+using FillArrays: Ones, OnesVector
+
+const Delta{T,N,V<:OnesVector{T},Axes} = DiagonalArray{T,N,V,Axes}
+function Delta{T}(
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
+) where {T}
+  uniquelens = unique(length, ax)
+  if !isone(length(uniquelens))
+    throw(ArgumentError("All axes must have the same length for Delta."))
+  end
+  return DiagonalArray{T}(Ones{T}(only(uniquelens)), ax)
+end
+function Delta{T}(
+  ax1::AbstractUnitRange{<:Integer}, ax_rest::AbstractUnitRange{<:Integer}...
+) where {T}
+  return Delta{T}((ax1, ax_rest...))
+end
+function Delta{T}(sz::Tuple{Integer,Vararg{Integer}}) where {T}
+  return Delta{T}(map(Base.OneTo, sz))
+end
+function Delta{T}(sz1::Integer, sz_rest::Integer...) where {T}
+  return Delta{T}((sz1, sz_rest...))
+end
+function Delta{T}(ax::Tuple{}) where {T}
+  return DiagonalArray{T}(Ones{T}(0), ax)
+end
 
 function delta(
   elt::Type, ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
 )
-  return DiagonalArray(Ones{elt}(minimum(length, ax)), ax)
+  return Delta{elt}(ax)
 end
 function δ(
   elt::Type, ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
@@ -35,7 +60,7 @@ function δ(ax1::AbstractUnitRange{<:Integer}, axs::AbstractUnitRange{<:Integer}
 end
 
 function delta(elt::Type, size::Tuple{Vararg{Int}})
-  return DiagonalArray(Ones{elt}(minimum(size)), size)
+  return Delta{elt}(size)
 end
 function δ(elt::Type, size::Tuple{Vararg{Int}})
   return delta(elt, size)
