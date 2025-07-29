@@ -1,6 +1,7 @@
 using Test: @test, @testset, @test_broken, @inferred
 using DiagonalArrays:
   DiagonalArrays,
+  Delta,
   DiagonalArray,
   DiagonalMatrix,
   δ,
@@ -161,6 +162,8 @@ using LinearAlgebra: Diagonal
         (δ(Base.OneTo.((2, 3))), Float64),
         (delta(Bool, 2, 3), Bool),
         (delta(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
+        (Delta{Bool}((2, 3)), Bool),
+        (Delta{Bool}(Base.OneTo.((2, 3))), Bool),
         (δ(Bool, 2, 3), Bool),
         (δ(Bool, Base.OneTo(2), Base.OneTo(3)), Bool),
         (delta(Bool, (2, 3)), Bool),
@@ -170,7 +173,8 @@ using LinearAlgebra: Diagonal
       )
         @test eltype(a) === elt′
         @test diaglength(a) == 2
-        @test a isa DiagonalArray{elt′}
+        @test a isa DiagonalArray{elt′,2}
+        @test a isa Delta{elt′,2}
         @test size(a) == (2, 3)
         @test diaglength(a) == 2
         @test storedlength(a) == 2
