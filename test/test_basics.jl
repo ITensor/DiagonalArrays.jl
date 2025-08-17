@@ -1,4 +1,5 @@
 using Test: @test, @testset, @test_broken, @inferred
+using DerivableInterfaces: permuteddims
 using DiagonalArrays:
   DiagonalArrays,
   Delta,
@@ -101,6 +102,19 @@ using LinearAlgebra: Diagonal
         eltype(DiagonalArray{elt,2}(undef, (2, 2))) ≡
         eltype(DiagonalArray{elt,2}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
         eltype(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
+    end
+    @testset "permutedims" begin
+      a = DiagonalArray(randn(elt, 2), (2, 3, 4))
+      b = permutedims(a, (3, 1, 2))
+      @test diagview(b) == diagview(a)
+      @test diagview(b) ≢ diagview(a)
+      @test size(b) === (4, 2, 3)
+    end
+    @testset "DerivableInterfaces.permuteddims" begin
+      a = DiagonalArray(randn(elt, 2), (2, 3, 4))
+      b = permuteddims(a, (3, 1, 2))
+      @test diagview(b) ≡ diagview(a)
+      @test size(b) === (4, 2, 3)
     end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))

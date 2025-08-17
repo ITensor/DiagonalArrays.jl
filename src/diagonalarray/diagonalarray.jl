@@ -165,3 +165,20 @@ end
 
 # DiagonalArrays interface.
 diagview(a::DiagonalArray) = a.diag
+
+# Special case for permutedims that is friendlier for immutable storage.
+function Base.permutedims(a::DiagonalArray, perm)
+  ((ndims(a) == length(perm)) && isperm(perm)) ||
+    throw(ArgumentError("Not a valid permutation"))
+  ax_perm = ntuple(d -> axes(a)[perm[d]], ndims(a))
+  # Unlike `permutedims(::Diagonal, perm)`, we copy here.
+  return DiagonalArray(copy(diagview(a)), ax_perm)
+end
+
+function DerivableInterfaces.permuteddims(a::DiagonalArray, perm)
+  ((ndims(a) == length(perm)) && isperm(perm)) ||
+    throw(ArgumentError("Not a valid permutation"))
+  ax_perm = ntuple(d -> axes(a)[perm[d]], ndims(a))
+  # Unlike `permutedims(::Diagonal, perm)`, we copy here.
+  return DiagonalArray(diagview(a), ax_perm)
+end
