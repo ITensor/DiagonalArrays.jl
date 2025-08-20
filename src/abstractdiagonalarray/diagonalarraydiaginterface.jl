@@ -81,7 +81,7 @@ end
   return DiagonalArrayStyle{ndims(type)}()
 end
 
-using Base.Broadcast: Broadcasted, broadcasted, flatten
+using Base.Broadcast: Broadcasted, broadcasted
 using MapBroadcast: Mapped
 # Map to a flattened broadcast expression of the diagonals of the arrays,
 # also checking that the function preserves zeros.
