@@ -3,9 +3,11 @@ using DerivableInterfaces: permuteddims
 using DiagonalArrays:
   DiagonalArrays,
   Delta,
+  DeltaMatrix,
   DiagonalArray,
   DiagonalMatrix,
   ScaledDelta,
+  ScaledDeltaMatrix,
   δ,
   delta,
   diagindices,
@@ -214,7 +216,9 @@ using LinearAlgebra: Diagonal, mul!
         @test eltype(a) === elt′
         @test diaglength(a) == 2
         @test a isa DiagonalArray{elt′,2}
+        @test a isa DiagonalMatrix{elt′}
         @test a isa Delta{elt′,2}
+        @test a isa DeltaMatrix{elt′}
         @test size(a) == (2, 2)
         @test diaglength(a) == 2
         @test storedlength(a) == 2
@@ -229,7 +233,8 @@ using LinearAlgebra: Diagonal, mul!
         # the diagonal structure properly.
         # https://github.com/ITensor/DiagonalArrays.jl/issues/7
         @test diagview(a′) isa Fill{promote_type(Int, elt′)}
-        @test a′ isa ScaledDelta{promote_type(Int, elt′)}
+        @test a′ isa ScaledDelta{promote_type(Int, elt′),2}
+        @test a′ isa ScaledDeltaMatrix{promote_type(Int, elt′)}
 
         b = randn(elt, (2, 3))
         a_dest = a * b

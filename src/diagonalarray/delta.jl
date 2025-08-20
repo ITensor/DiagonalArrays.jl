@@ -1,8 +1,25 @@
 using FillArrays: AbstractFillVector, Ones, OnesVector
 
-const ScaledDelta{T,N,V<:AbstractFillVector{T},Axes} = DiagonalArray{T,N,V,Axes}
+const ScaledDelta{T,N,Diag<:AbstractFillVector{T},Unstored<:AbstractArray{T,N}} = DiagonalArray{
+  T,N,Diag,Unstored
+}
+const ScaledDeltaVector{T,Diag<:AbstractFillVector{T},Unstored<:AbstractVector{T}} = DiagonalVector{
+  T,Diag,Unstored
+}
+const ScaledDeltaMatrix{T,Diag<:AbstractFillVector{T},Unstored<:AbstractMatrix{T}} = DiagonalMatrix{
+  T,Diag,Unstored
+}
 
-const Delta{T,N,V<:OnesVector{T},Axes} = DiagonalArray{T,N,V,Axes}
+const Delta{T,N,Diag<:OnesVector{T},Unstored<:AbstractArray{T,N}} = DiagonalArray{
+  T,N,Diag,Unstored
+}
+const DeltaVector{T,Diag<:OnesVector{T},Unstored<:AbstractVector{T}} = DiagonalVector{
+  T,Diag,Unstored
+}
+const DeltaMatrix{T,Diag<:OnesVector{T},Unstored<:AbstractMatrix{T}} = DiagonalMatrix{
+  T,Diag,Unstored
+}
+
 function Delta{T}(
   ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
 ) where {T}
