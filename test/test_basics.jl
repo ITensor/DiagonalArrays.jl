@@ -3,8 +3,11 @@ using DerivableInterfaces: permuteddims
 using DiagonalArrays:
   DiagonalArrays,
   Delta,
+  DeltaMatrix,
   DiagonalArray,
   DiagonalMatrix,
+  ScaledDelta,
+  ScaledDeltaMatrix,
   δ,
   delta,
   diagindices,
@@ -116,6 +119,22 @@ using LinearAlgebra: Diagonal, mul!
       @test diagview(b) ≡ diagview(a)
       @test size(b) === (4, 2, 3)
     end
+    @testset "Broadcasting" begin
+      a = DiagonalArray(randn(elt, 2), (2, 3))
+      b = DiagonalArray(randn(elt, 2), (2, 3))
+      c = a .+ 2 .* b
+      @test c ≈ Array(a) + 2 * Array(b)
+      # Non-zero-preserving functions not supported yet.
+      @test_broken a .+ 2
+
+      c = DiagonalArray{elt}(undef, (2, 3))
+      c .= a .+ 2 .* b
+      @test c ≈ Array(a) + 2 * Array(b)
+
+      # Non-zero-preserving functions not supported yet.
+      c = DiagonalArray{elt}(undef, (2, 3))
+      @test_broken c .= a .+ 2
+    end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))
       a1[1, 1] = 11
@@ -197,7 +216,9 @@ using LinearAlgebra: Diagonal, mul!
         @test eltype(a) === elt′
         @test diaglength(a) == 2
         @test a isa DiagonalArray{elt′,2}
+        @test a isa DiagonalMatrix{elt′}
         @test a isa Delta{elt′,2}
+        @test a isa DeltaMatrix{elt′}
         @test size(a) == (2, 2)
         @test diaglength(a) == 2
         @test storedlength(a) == 2
@@ -211,11 +232,17 @@ using LinearAlgebra: Diagonal, mul!
         # TODO: Fix this. Mapping doesn't preserve
         # the diagonal structure properly.
         # https://github.com/ITensor/DiagonalArrays.jl/issues/7
-        @test_broken diagview(a′) isa Fill
+        @test diagview(a′) isa Fill{promote_type(Int, elt′)}
+        @test a′ isa ScaledDelta{promote_type(Int, elt′),2}
+        @test a′ isa ScaledDeltaMatrix{promote_type(Int, elt′)}
 
         b = randn(elt, (2, 3))
         a_dest = a * b
         @test a_dest ≈ Array(a) * Array(b)
+
+        a_dest = a * a
+        @test a_dest ≈ Array(a) * Array(a)
+        @test diagview(a_dest) isa Ones{elt′}
       end
     end
   end

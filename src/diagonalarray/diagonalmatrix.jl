@@ -1,11 +1,6 @@
-const DiagonalMatrix{T,Diag,Zero} = DiagonalArray{T,2,Diag,Zero}
-
-function DiagonalMatrix(diag::AbstractVector)
-  return DiagonalArray{<:Any,2}(diag)
-end
-function DiagonalMatrix(diag::AbstractVector, ax::Tuple)
-  return DiagonalArray{<:Any,2}(diag, ax)
-end
+const DiagonalMatrix{T,Diag<:AbstractVector{T},Unstored<:AbstractMatrix{T}} = DiagonalArray{
+  T,2,Diag,Unstored
+}
 
 # LinearAlgebra
 

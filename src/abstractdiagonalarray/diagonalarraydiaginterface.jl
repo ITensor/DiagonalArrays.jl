@@ -30,10 +30,6 @@ struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
 
 DiagonalArrayStyle{M}(::Val{N}) where {M,N} = DiagonalArrayStyle{N}()
 
-@interface ::AbstractDiagonalArrayInterface function Broadcast.BroadcastStyle(type::Type)
-  return DiagonalArrayStyle{ndims(type)}()
-end
-
 function SparseArraysBase.isstored(
   a::AbstractDiagonalArray{<:Any,N}, I::Vararg{Int,N}
 ) where {N}
@@ -79,6 +75,29 @@ end
 function Base.setindex!(a::AbstractDiagonalArray, value, I::DiagIndex)
   # TODO: Use `@interface` rather than `invoke`.
   return invoke(setindex!, Tuple{AbstractArray,Any,DiagIndex}, a, value, I)
+end
+
+@interface ::AbstractDiagonalArrayInterface function Broadcast.BroadcastStyle(type::Type)
+  return DiagonalArrayStyle{ndims(type)}()
+end
+
+using Base.Broadcast: Broadcasted, broadcasted
+using MapBroadcast: Mapped
+# Map to a flattened broadcast expression of the diagonals of the arrays,
+# also checking that the function preserves zeros.
+function broadcasted_diagview(bc::Broadcasted)
+  m = Mapped(bc)
+  iszero(m.f(map(zero ∘ eltype, m.args)...)) || error(
+    "Broadcasting DiagonalArrays with function that doesn't preserve zeros isn't supported yet.",
+  )
+  return broadcasted(m.f, map(diagview, m.args)...)
+end
+function Base.copy(bc::Broadcasted{<:DiagonalArrayStyle})
+  return DiagonalArray(copy(broadcasted_diagview(bc)), axes(bc))
+end
+function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:DiagonalArrayStyle})
+  copyto!(diagview(dest), broadcasted_diagview(bc))
+  return dest
 end
 
 ## SparseArraysBase.StorageIndex(i::DiagIndex) = StorageIndex(index(i))
