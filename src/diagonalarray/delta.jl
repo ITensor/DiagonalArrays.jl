@@ -1,4 +1,6 @@
-using FillArrays: Ones, OnesVector
+using FillArrays: AbstractFillVector, Ones, OnesVector
+
+const ScaledDelta{T,N,V<:AbstractFillVector{T},Axes} = DiagonalArray{T,N,V,Axes}
 
 const Delta{T,N,V<:OnesVector{T},Axes} = DiagonalArray{T,N,V,Axes}
 function Delta{T}(

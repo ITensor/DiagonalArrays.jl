@@ -5,6 +5,7 @@ using DiagonalArrays:
   Delta,
   DiagonalArray,
   DiagonalMatrix,
+  ScaledDelta,
   δ,
   delta,
   diagindices,
@@ -228,6 +229,7 @@ using LinearAlgebra: Diagonal, mul!
         # the diagonal structure properly.
         # https://github.com/ITensor/DiagonalArrays.jl/issues/7
         @test diagview(a′) isa Fill{promote_type(Int, elt′)}
+        @test a′ isa ScaledDelta{promote_type(Int, elt′)}
 
         b = randn(elt, (2, 3))
         a_dest = a * b
