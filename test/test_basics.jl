@@ -14,7 +14,7 @@ using DiagonalArrays:
   diagview
 using FillArrays: Fill, Ones
 using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
-using LinearAlgebra: Diagonal
+using LinearAlgebra: Diagonal, mul!
 
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -131,6 +131,15 @@ using LinearAlgebra: Diagonal
       @test storedlength(a_dest) == 2
       @test a_dest isa DiagonalMatrix{elt}
 
+      a_dest = DiagonalArray{elt}(undef, (2, 4))
+      mul!(a_dest, a1, a2)
+      @test Array(a_dest) ≈ Array(a1) * Array(a2)
+
+      a_dest = DiagonalArray(randn(elt, 2), (2, 4))
+      a_dest′ = copy(a_dest)
+      mul!(a_dest′, a1, a2, 2, 3)
+      @test Array(a_dest′) ≈ Array(a1) * Array(a2) * 2 + Array(a_dest) * 3
+
       # TODO: Make generic to GPU, use `allocate_randn`?
       a2 = randn(elt, (3, 4))
       a_dest = a1 * a2
@@ -195,6 +204,7 @@ using LinearAlgebra: Diagonal
         @test a == DiagonalArray(ones(2), (2, 2))
         @test diagview(a) == ones(2)
         @test diagview(a) isa Ones{elt′}
+        @test copy(a) ≡ a
 
         a′ = 2a
         @test diagview(a′) == 2ones(2)

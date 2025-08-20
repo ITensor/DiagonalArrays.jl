@@ -120,6 +120,13 @@ function DiagonalArray{<:Any,N}(diag::AbstractVector{T}, dims::Vararg{Int,N}) wh
   return DiagonalArray{T,N}(diag, dims)
 end
 
+function DiagonalArray{<:Any,N}(
+  diag::AbstractVector{T},
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
+) where {T,N}
+  return DiagonalArray{T,N}(diag, ax)
+end
+
 function DiagonalArray(diag::AbstractVector{T}, dims::Dims{N}) where {T,N}
   return DiagonalArray{T,N}(diag, dims)
 end
@@ -162,6 +169,10 @@ end
 function Base.similar(a::DiagonalArray, unstored::Unstored)
   return DiagonalArray(undef, unstored)
 end
+
+# This definition is helpful for immutable diagonals
+# such as FillArrays.
+Base.copy(a::DiagonalArray) = DiagonalArray(copy(diagview(a)), axes(a))
 
 # DiagonalArrays interface.
 diagview(a::DiagonalArray) = a.diag
