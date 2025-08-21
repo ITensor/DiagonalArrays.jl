@@ -1,5 +1,6 @@
 module DiagonalArrays
 
+include("dual.jl")
 include("diaginterface/diaginterface.jl")
 include("diaginterface/diagindex.jl")
 include("diaginterface/diagindices.jl")

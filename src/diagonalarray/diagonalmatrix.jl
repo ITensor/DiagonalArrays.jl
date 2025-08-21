@@ -8,7 +8,7 @@ using LinearAlgebra: LinearAlgebra
 
 function mul_diagviews(a1, a2)
   # TODO: Compare that duals are equal, or define a function to overload.
-  axes(a1, 2) == axes(a2, 1) || throw(
+  dual(axes(a1, 2)) == axes(a2, 1) || throw(
     DimensionMismatch(
       lazy"Incompatible dimensions for multiplication: $(axes(a1)) and $(axes(a2))"
     ),
