@@ -99,6 +99,16 @@ DiagonalArrays.dual(s::SU2) = SU2(s.j, !s.isdual)
       d = eigh_vals(a)
       @test d ≡ Ones{real(elt)}(length(ax))
     end
+    @testset "left null" begin
+      ax = SU2(2)
+      a = δ(elt, (ax, ax))
+      @test_broken left_null(a)
+    end
+    @testset "right null" begin
+      ax = SU2(2)
+      a = δ(elt, (ax, ax))
+      @test_broken right_null(a)
+    end
   end
 
   @testset "ScaledDeltaMatrix factorizations (eltype=$elt)" for elt in (
@@ -184,6 +194,20 @@ DiagonalArrays.dual(s::SU2) = SU2(s.j, !s.isdual)
       a = scale * δ(elt, (dual(ax), ax))
       d = eigh_vals(a)
       @test d ≡ scale * Ones{real(elt)}(length(ax))
+    end
+    @testset "left null" begin
+      ax = SU2(2)
+      rng = StableRNG(1234)
+      scale = randn(rng, real(elt))
+      a = scale * δ(elt, (ax, ax))
+      @test_broken left_null(a)
+    end
+    @testset "right null" begin
+      ax = SU2(2)
+      rng = StableRNG(1234)
+      scale = randn(rng, real(elt))
+      a = scale * δ(elt, (ax, ax))
+      @test_broken right_null(a)
     end
   end
 end
