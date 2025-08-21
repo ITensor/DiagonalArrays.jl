@@ -14,6 +14,7 @@ using MatrixAlgebraKit:
   MatrixAlgebraKit,
   AbstractAlgorithm,
   check_input,
+  default_qr_algorithm,
   eig_full,
   eig_full!,
   eig_vals,
@@ -238,7 +239,9 @@ function MatrixAlgebraKit.svd_vals!(a, F, alg::ScaledDeltaAlgorithm)
 end
 
 # orth
-for f in [:left_orth!, :left_polar!, :qr_compact!, :qr_full!]
+# left_orth is implicitly defined by defining backends like
+# qr_compact and left_polar.
+for f in [:left_polar!, :qr_compact!, :qr_full!]
   @eval begin
     function MatrixAlgebraKit.$f(a, F, alg::DeltaAlgorithm)
       check_input($f, a, F, alg)
@@ -257,7 +260,9 @@ for f in [:left_orth!, :left_polar!, :qr_compact!, :qr_full!]
     end
   end
 end
-for f in [:right_orth!, :right_polar!, :lq_compact!, :lq_full!]
+# right_orth is implicitly defined by defining backends like
+# lq_compact and right_polar.
+for f in [:right_polar!, :lq_compact!, :lq_full!]
   @eval begin
     function MatrixAlgebraKit.$f(a, F, alg::DeltaAlgorithm)
       check_input($f, a, F, alg)
@@ -278,14 +283,18 @@ for f in [:right_orth!, :right_polar!, :lq_compact!, :lq_full!]
 end
 
 # null
-for Alg in [:DeltaAlgorithm, :ScaledDeltaAlgorithm]
+for T in [:DeltaMatrix, :ScaledDeltaMatrix]
   @eval begin
-    function MatrixAlgebraKit.left_null!(a, F, alg::$Alg)
-      check_input(left_null!, a, F, alg)
+    # TODO: Right now we can't overload `left_null!` on an algorithm,
+    # make a PR to MatrixAlgebraKit.jl to allow that.
+    function MatrixAlgebraKit.left_null!(a::$T, F)
+      check_input(left_null!, a, F, default_qr_algorithm(a))
       return error("Not implemented.")
     end
-    function MatrixAlgebraKit.right_null!(a, F, alg::$Alg)
-      check_input(right_null!, a, F, alg)
+    # TODO: Right now we can't overload `right_null!` on an algorithm,
+    # make a PR to MatrixAlgebraKit.jl to allow that.
+    function MatrixAlgebraKit.right_null!(a::$T, F)
+      check_input(right_null!, a, F, default_qr_algorithm(a))
       return error("Not implemented.")
     end
   end
