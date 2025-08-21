@@ -1,7 +1,7 @@
 name = "DiagonalArrays"
 uuid = "74fd4be6-21e2-4f6f-823a-4360d37c7a77"
 authors = ["ITensor developers <support@itensor.org> and contributors"]
-version = "0.3.15"
+version = "0.3.16"
 
 [deps]
 ArrayLayouts = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
@@ -11,11 +11,18 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MapBroadcast = "ebd9b9da-f48d-417c-9660-449667d60261"
 SparseArraysBase = "0d5efcca-f356-4864-8770-e1ed8d78f208"
 
+[weakdeps]
+MatrixAlgebraKit = "6c742aac-3347-4629-af66-fc926824e5e4"
+
+[extensions]
+DiagonalArraysMatrixAlgebraKitExt = "MatrixAlgebraKit"
+
 [compat]
 ArrayLayouts = "1.10.4"
 DerivableInterfaces = "0.5.5"
 FillArrays = "1.13.0"
 LinearAlgebra = "1.10.0"
 MapBroadcast = "0.1.10"
+MatrixAlgebraKit = "0.2"
 SparseArraysBase = "0.7.2"
 julia = "1.10"

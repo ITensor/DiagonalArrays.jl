@@ -17,7 +17,7 @@ using DiagonalArrays:
   diagview
 using FillArrays: Fill, Ones
 using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
-using LinearAlgebra: Diagonal, mul!
+using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
 
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -134,6 +134,28 @@ using LinearAlgebra: Diagonal, mul!
       # Non-zero-preserving functions not supported yet.
       c = DiagonalArray{elt}(undef, (2, 3))
       @test_broken c .= a .+ 2
+    end
+    @testset "LinearAlgebra matrix properties" begin
+      @test ishermitian(DiagonalMatrix([1, 2]))
+      @test !ishermitian(DiagonalMatrix([1, 2], (2, 3)))
+      @test !ishermitian(DiagonalMatrix([1 + 1im, 2 + 2im]))
+      @test ishermitian(DiagonalMatrix([ones(2, 2), ones(3, 3)]))
+      @test !ishermitian(DiagonalMatrix([randn(2, 2), randn(3, 3)]))
+
+      @test issymmetric(DiagonalMatrix([1, 2]))
+      @test !issymmetric(DiagonalMatrix([1, 2], (2, 3)))
+      @test issymmetric(DiagonalMatrix([1 + 1im, 2 + 2im]))
+      @test issymmetric(DiagonalMatrix([ones(2, 2), ones(3, 3)]))
+      @test !issymmetric(DiagonalMatrix([randn(2, 2), randn(3, 3)]))
+      @test !issymmetric(DiagonalMatrix([randn(2, 2), randn(2, 3)]))
+
+      @test isposdef(DiagonalMatrix([1, 2]))
+      @test !isposdef(DiagonalMatrix([1, -2]))
+      @test !isposdef(DiagonalMatrix([1, 2], (2, 3)))
+      @test !isposdef(DiagonalMatrix([1 + 1im, 2 + 2im]))
+      @test isposdef(DiagonalMatrix([[1 0; 0 1], [2 0; 0 2]]))
+      @test !isposdef(DiagonalMatrix([randn(2, 2), randn(3, 3)]))
+      @test !isposdef(DiagonalMatrix([randn(2, 2), randn(2, 3)]))
     end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))

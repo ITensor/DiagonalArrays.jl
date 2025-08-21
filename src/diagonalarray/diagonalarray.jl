@@ -170,9 +170,13 @@ function Base.similar(a::DiagonalArray, unstored::Unstored)
   return DiagonalArray(undef, unstored)
 end
 
-# This definition is helpful for immutable diagonals
+# These definitions are helpful for immutable diagonals
 # such as FillArrays.
-Base.copy(a::DiagonalArray) = DiagonalArray(copy(diagview(a)), axes(a))
+for f in [:complex, :copy, :imag, :real]
+  @eval begin
+    Base.$f(a::DiagonalArray) = DiagonalArray($f(diagview(a)), axes(a))
+  end
+end
 
 # DiagonalArrays interface.
 diagview(a::DiagonalArray) = a.diag
