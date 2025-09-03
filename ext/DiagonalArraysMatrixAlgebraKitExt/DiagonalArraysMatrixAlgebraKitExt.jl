@@ -125,7 +125,7 @@ for f in [
 ]
   for Alg in [:ScaledDeltaAlgorithm, :DeltaAlgorithm]
     @eval begin
-      function MatrixAlgebraKit.initialize_output(::typeof($f), a, alg::$Alg)
+      function MatrixAlgebraKit.initialize_output(::typeof($f), a::AbstractMatrix, alg::$Alg)
         return nothing
       end
     end
