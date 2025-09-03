@@ -125,7 +125,9 @@ for f in [
 ]
   for Alg in [:ScaledDeltaAlgorithm, :DeltaAlgorithm]
     @eval begin
-      function MatrixAlgebraKit.initialize_output(::typeof($f), a::AbstractMatrix, alg::$Alg)
+      function MatrixAlgebraKit.initialize_output(
+        ::typeof($f), a::AbstractMatrix, alg::$Alg
+      )
         return nothing
       end
     end
@@ -148,13 +150,17 @@ for f in [
   :svd_vals!,
 ]
   @eval begin
-    function MatrixAlgebraKit.check_input(::typeof($f), a::AbstractMatrix, F, alg::DeltaAlgorithm)
+    function MatrixAlgebraKit.check_input(
+      ::typeof($f), a::AbstractMatrix, F, alg::DeltaAlgorithm
+    )
       @assert size(a, 1) == size(a, 2)
       @assert isdiag(a)
       @assert all(isone, diagview(a))
       return nothing
     end
-    function MatrixAlgebraKit.check_input(::typeof($f), a::AbstractMatrix, F, alg::ScaledDeltaAlgorithm)
+    function MatrixAlgebraKit.check_input(
+      ::typeof($f), a::AbstractMatrix, F, alg::ScaledDeltaAlgorithm
+    )
       @assert size(a, 1) == size(a, 2)
       @assert isdiag(a)
       @assert allequal(diagview(a))
@@ -164,13 +170,17 @@ for f in [
 end
 for f in [:eig_full!, :eig_vals!, :eigh_full!, :eigh_vals!]
   @eval begin
-    function MatrixAlgebraKit.check_input(::typeof($f), a::AbstractMatrix, F, alg::DeltaAlgorithm)
+    function MatrixAlgebraKit.check_input(
+      ::typeof($f), a::AbstractMatrix, F, alg::DeltaAlgorithm
+    )
       @assert issquare(a)
       @assert isdiag(a)
       @assert all(isone, diagview(a))
       return nothing
     end
-    function MatrixAlgebraKit.check_input(::typeof($f), a::AbstractMatrix, F, alg::ScaledDeltaAlgorithm)
+    function MatrixAlgebraKit.check_input(
+      ::typeof($f), a::AbstractMatrix, F, alg::ScaledDeltaAlgorithm
+    )
       @assert issquare(a)
       @assert isdiag(a)
       @assert allequal(diagview(a))
