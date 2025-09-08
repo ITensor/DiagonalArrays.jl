@@ -97,6 +97,7 @@ function setdiagindex!(a::AbstractArray, v, i::Integer)
 end
 
 function getdiagindices(a::AbstractArray, I)
+  # TODO: Should this be a view?
   return @view diagview(a)[I]
 end
 

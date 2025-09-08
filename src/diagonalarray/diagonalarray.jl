@@ -20,10 +20,58 @@ SparseArraysBase.unstored(a::DiagonalArray) = a.unstored
 Base.size(a::DiagonalArray) = size(unstored(a))
 Base.axes(a::DiagonalArray) = axes(unstored(a))
 
+function DiagonalArray(diag::AbstractVector, unstored::Unstored)
+  return _DiagonalArray(diag, parent(unstored))
+end
 function DiagonalArray(::UndefInitializer, unstored::Unstored)
-  return _DiagonalArray(
-    Vector{eltype(unstored)}(undef, minimum(size(unstored))), parent(unstored)
-  )
+  return DiagonalArray(Vector{eltype(unstored)}(undef, minimum(size(unstored))), unstored)
+end
+
+# This helps to support diagonals where the elements are known
+# from the types, for example diagonals that are `Zeros` and `Ones`.
+function DiagonalArray{T,N,D,U}(
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray(D((Base.OneTo(minimum(length, ax)),)), Unstored(U(ax)))
+end
+function DiagonalArray{T,N,D,U}(
+  ax1::AbstractUnitRange{<:Integer}, ax_rest::Vararg{AbstractUnitRange{<:Integer}}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}((ax1, ax_rest...))
+end
+function DiagonalArray{T,N,D,U}(
+  sz::Tuple{Integer,Vararg{AbstractUnitRange{<:Integer}}}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(Base.OneTo.(sz))
+end
+function DiagonalArray{T,N,D,U}(
+  sz1::Integer, sz_rest::Vararg{Integer}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}((sz1, sz_rest...))
+end
+
+# This helps to support diagonals where the elements are known
+# from the types, for example diagonals that are `Zeros` and `Ones`.
+# These versions use the default unstored type `Zeros{T,N}`.
+function DiagonalArray{T,N,D}(
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
+) where {T,N,D<:AbstractVector{T}}
+  return DiagonalArray{T,N,D,Zeros{T,N}}(ax)
+end
+function DiagonalArray{T,N,D}(
+  ax1::AbstractUnitRange{<:Integer}, ax_rest::Vararg{AbstractUnitRange{<:Integer}}
+) where {T,N,D<:AbstractVector{T}}
+  return DiagonalArray{T,N,D,Zeros{T,N}}(ax1, ax_rest...)
+end
+function DiagonalArray{T,N,D}(
+  sz::Tuple{Integer,Vararg{AbstractUnitRange{<:Integer}}}
+) where {T,N,D<:AbstractVector{T}}
+  return DiagonalArray{T,N,D,Zeros{T,N}}(sz)
+end
+function DiagonalArray{T,N,D}(
+  sz1::Integer, sz_rest::Vararg{Integer}
+) where {T,N,D<:AbstractVector{T}}
+  return DiagonalArray{T,N,D,Zeros{T,N}}(sz1, sz_rest...)
 end
 
 # Constructors accepting axes.
@@ -32,7 +80,7 @@ function DiagonalArray{T,N}(
   ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
 ) where {T,N}
   N == length(ax) || throw(ArgumentError("Wrong number of axes"))
-  return _DiagonalArray(convert(AbstractVector{T}, diag), Zeros{T}(ax))
+  return DiagonalArray(convert(AbstractVector{T}, diag), Unstored(Zeros{T}(ax)))
 end
 function DiagonalArray{T,N}(
   diag::AbstractVector,
@@ -97,7 +145,7 @@ function DiagonalArray{T}(
 end
 
 function DiagonalArray{T,N}(diag::AbstractVector, dims::Dims{N}) where {T,N}
-  return _DiagonalArray(convert(AbstractVector{T}, diag), Zeros{T}(dims))
+  return DiagonalArray(convert(AbstractVector{T}, diag), Unstored(Zeros{T}(dims)))
 end
 
 function DiagonalArray{T,N}(diag::AbstractVector, dims::Vararg{Int,N}) where {T,N}
@@ -161,6 +209,28 @@ function DiagonalArray{T}(::UndefInitializer, dims::Vararg{Int,N}) where {T,N}
   return DiagonalArray{T,N}(undef, dims)
 end
 
+# 0-dim limit.
+function DiagonalArray{T,0,D}(
+  ::UndefInitializer, ax::Tuple{}
+) where {T,D<:AbstractVector{T}}
+  return DiagonalArray{T,0,D}(D(undef, 0), ax)
+end
+function DiagonalArray{T,0,D}(::UndefInitializer) where {T,D<:AbstractVector{T}}
+  return DiagonalArray{T,0,D}(undef, ())
+end
+function DiagonalArray{T,0}(::UndefInitializer, ax::Tuple{}) where {T}
+  return DiagonalArray{T,0,Vector{T}}(undef, ax)
+end
+function DiagonalArray{T,0}(::UndefInitializer) where {T}
+  return DiagonalArray{T,0}(undef, ())
+end
+function DiagonalArray{T}(::UndefInitializer, axes::Tuple{}) where {T}
+  return DiagonalArray{T,0}(undef, ())
+end
+function DiagonalArray{T}(::UndefInitializer) where {T}
+  return DiagonalArray{T}(undef, ())
+end
+
 # Axes version
 function DiagonalArray{T}(::UndefInitializer, axes::NTuple{N,Base.OneTo{Int}}) where {T,N}
   return DiagonalArray{T,N}(undef, length.(axes))
@@ -196,4 +266,110 @@ function DerivableInterfaces.permuteddims(a::DiagonalArray, perm)
   ax_perm = ntuple(d -> axes(a)[perm[d]], ndims(a))
   # Unlike `permutedims(::Diagonal, perm)`, we copy here.
   return DiagonalArray(diagview(a), ax_perm)
+end
+
+# Scalar indexing.
+using DerivableInterfaces: @interface, interface
+one_based_range(r) = false
+one_based_range(r::Base.OneTo) = true
+one_based_range(r::Base.Slice) = true
+function _diag_axes(a::DiagonalArray, I...)
+  return map(ntuple(identity, ndims(a))) do d
+    return Base.axes1(axes(a, d)[I[d]])
+  end
+end
+# A view that preserves the diagonal structure.
+function _view_diag(a::DiagonalArray, I...)
+  ax = _diag_axes(a, I...)
+  return DiagonalArray(view(diagview(a), Base.OneTo(minimum(length, I))), ax)
+end
+# A slice that preserves the diagonal structure.
+function _getindex_diag(a::DiagonalArray, I...)
+  ax = _diag_axes(a, I...)
+  return DiagonalArray(diagview(a)[Base.OneTo(minimum(length, I))], ax)
+end
+function Base.view(a::DiagonalArray, I...)
+  I′ = to_indices(a, I)
+  return if all(one_based_range, I′)
+    _view_diag(a, I′...)
+  else
+    invoke(view, Tuple{AbstractArray,Vararg}, a, I′...)
+  end
+end
+function Base.getindex(a::DiagonalArray, I::Int...)
+  return @interface interface(a) a[I...]
+end
+function Base.getindex(a::DiagonalArray, I::DiagIndex)
+  return getdiagindex(a, index(I))
+end
+function Base.getindex(a::DiagonalArray, I::DiagIndices)
+  # TODO: Should this be a view?
+  return @view diagview(a)[indices(I)]
+end
+function Base.getindex(a::DiagonalArray, I...)
+  I′ = to_indices(a, I)
+  return if all(i -> i isa Real, I′)
+    # Catch scalar indexing case.
+    @interface interface(a) a[I...]
+  elseif all(one_based_range, I′)
+    _getindex_diag(a, I′...)
+  else
+    copy(view(a, I′...))
+  end
+end
+
+# Define in order to preserve immutable diagonals such as FillArrays.
+function DiagonalArray{T,N}(a::DiagonalArray{T,N}) where {T,N}
+  # TODO: Should this copy? This matches the design of `LinearAlgebra.Diagonal`:
+  # https://github.com/JuliaLang/LinearAlgebra.jl/blob/release-1.12/src/diagonal.jl#L110-L112
+  return a
+end
+function DiagonalArray{T,N}(a::DiagonalArray{<:Any,N}) where {T,N}
+  return DiagonalArray{T,N}(diagview(a))
+end
+function DiagonalArray{T}(a::DiagonalArray) where {T}
+  return DiagonalArray{T,ndims(a)}(a)
+end
+function DiagonalArray(a::DiagonalArray)
+  return DiagonalArray{eltype(a),ndims(a)}(a)
+end
+function Base.AbstractArray{T,N}(a::DiagonalArray{<:Any,N}) where {T,N}
+  return DiagonalArray{T,N}(a)
+end
+
+# TODO: These definitions work around this issue:
+# https://github.com/JuliaArrays/FillArrays.jl/issues/416
+# when the diagonal is a FillArrays.Ones or Zeros.
+using Base.Broadcast: Broadcast, broadcast, broadcasted
+using FillArrays: AbstractFill, Ones, Zeros
+_broadcasted(f::F, a::AbstractArray) where {F} = broadcasted(f, a)
+_broadcasted(::typeof(identity), a::Ones) = a
+_broadcasted(::typeof(identity), a::Zeros) = a
+_broadcasted(::typeof(complex), a::Ones) = Ones{complex(eltype(a))}(axes(a))
+_broadcasted(::typeof(complex), a::Zeros) = Zeros{complex(eltype(a))}(axes(a))
+_broadcasted(elt::Type, a::Ones) = Ones{elt}(axes(a))
+_broadcasted(elt::Type, a::Zeros) = Zeros{elt}(axes(a))
+_broadcasted(::typeof(inv), a::Ones) = _broadcasted(typeof(inv(oneunit(eltype(a)))), a)
+using LinearAlgebra: pinv
+_broadcasted(::typeof(pinv), a::Ones) = _broadcasted(typeof(inv(oneunit(eltype(a)))), a)
+_broadcasted(::typeof(sqrt), a::Ones) = _broadcasted(typeof(sqrt(one(eltype(a)))), a)
+_broadcasted(::typeof(sqrt), a::Zeros) = _broadcasted(typeof(sqrt(zero(eltype(a)))), a)
+_broadcasted(::typeof(cbrt), a::Ones) = _broadcasted(typeof(cbrt(one(eltype(a)))), a)
+_broadcasted(::typeof(cbrt), a::Zeros) = _broadcasted(typeof(cbrt(zero(eltype(a)))), a)
+_broadcasted(::typeof(exp), a::Zeros) = Ones{typeof(exp(zero(eltype(a))))}(axes(a))
+_broadcasted(::typeof(cis), a::Zeros) = Ones{typeof(cis(zero(eltype(a))))}(axes(a))
+_broadcasted(::typeof(log), a::Ones) = Zeros{typeof(log(one(eltype(a))))}(axes(a))
+_broadcasted(::typeof(cos), a::Zeros) = Ones{typeof(cos(zero(eltype(a))))}(axes(a))
+_broadcasted(::typeof(sin), a::Zeros) = _broadcasted(typeof(sin(zero(eltype(a)))), a)
+_broadcasted(::typeof(tan), a::Zeros) = _broadcasted(typeof(tan(zero(eltype(a)))), a)
+_broadcasted(::typeof(sec), a::Zeros) = Ones{typeof(sec(zero(eltype(a))))}(axes(a))
+_broadcasted(::typeof(cosh), a::Zeros) = Ones{typeof(cosh(zero(eltype(a))))}(axes(a))
+# Eager version of `_broadcasted`.
+_broadcast(f::F, a::AbstractArray) where {F} = copy(_broadcasted(f, a))
+
+function Broadcast.broadcasted(
+  ::DiagonalArrayStyle{N}, f::F, a::DiagonalArray{T,N,Diag}
+) where {F,T,N,Diag<:AbstractFill{T}}
+  # TODO: Check that `f` preserves zeros?
+  return DiagonalArray(_broadcasted(f, diagview(a)), axes(a))
 end
