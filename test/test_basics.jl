@@ -1,4 +1,3 @@
-using Test: @test, @testset, @test_broken, @inferred
 using DerivableInterfaces: permuteddims
 using DiagonalArrays:
   DiagonalArrays,
@@ -19,9 +18,10 @@ using DiagonalArrays:
   diagview,
   getdiagindices
 using FillArrays: Fill, Ones, Zeros
-using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
 using LinearAlgebra:
   Diagonal, det, ishermitian, isposdef, issymmetric, logdet, mul!, pinv, tr
+using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
+using Test: @test, @test_throws, @testset, @test_broken, @inferred
 
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -118,6 +118,8 @@ using LinearAlgebra:
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, (2, 2)) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, 2, 2) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2)))
+
+      init = ShapeInitializer()
       @test DiagonalMatrix(Ones{elt}(2)) ≡
         DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(init, Base.OneTo.((2, 2))) ≡
         DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(
@@ -128,6 +130,14 @@ using LinearAlgebra:
         DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(
           init, Unstored(Zeros{elt}(2, 2))
         )
+
+      init = ShapeInitializer()
+      @test_throws ErrorException DiagonalMatrix{elt,Vector{elt}}(init, Base.OneTo.((2, 2)))
+      @test_throws ErrorException DiagonalMatrix{elt,Vector{elt}}(
+        init, Base.OneTo.((2, 2))...
+      )
+      @test_throws ErrorException DiagonalMatrix{elt,Vector{elt}}(init, (2, 2))
+      @test_throws ErrorException DiagonalMatrix{elt,Vector{elt}}(init, 2, 2)
 
       # 0-dim constructors
       v = randn(elt, 1)
