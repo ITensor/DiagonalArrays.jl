@@ -19,7 +19,7 @@ using DiagonalArrays:
   diagview
 using FillArrays: Fill, Ones, Zeros
 using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
-using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
+using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric, pinv
 
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -215,6 +215,41 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
       # Non-zero-preserving functions not supported yet.
       c = DiagonalArray{elt}(undef, (2, 3))
       @test_broken c .= a .+ 2
+
+      a_ones = DiagonalMatrix(Ones{elt}(2))
+      a_zeros = DiagonalMatrix(Zeros{elt}(2))
+      @test identity.(a_ones) ≡ DiagonalMatrix(Ones{elt}(2))
+      @test identity.(a_zeros) ≡ DiagonalMatrix(Zeros{elt}(2))
+      @test complex.(a_ones) ≡ DiagonalMatrix(Ones{complex(elt)}(2))
+      @test complex.(a_zeros) ≡ DiagonalMatrix(Zeros{complex(elt)}(2))
+      @test Float32.(a_ones) ≡ DiagonalMatrix(Ones{Float32}(2))
+      @test Float32.(a_zeros) ≡ DiagonalMatrix(Zeros{Float32}(2))
+      @test inv.(a_ones) ≡ DiagonalMatrix(Ones{elt}(2))
+      @test inv.(a_zeros) ≡ DiagonalMatrix(Fill(inv(zero(elt)), 2))
+      @test pinv.(a_ones) ≡ DiagonalMatrix(Ones{elt}(2))
+      @test pinv.(a_zeros) ≡ DiagonalMatrix(Zeros{elt}(2))
+      @test sqrt.(a_ones) ≡ DiagonalMatrix(Ones{elt}(2))
+      @test sqrt.(a_zeros) ≡ DiagonalMatrix(Zeros{elt}(2))
+      if elt <: Real
+        @test cbrt.(a_ones) ≡ DiagonalMatrix(Ones{elt}(2))
+        @test cbrt.(a_zeros) ≡ DiagonalMatrix(Zeros{elt}(2))
+      end
+      @test exp.(a_ones) ≡ DiagonalMatrix(Fill(exp(one(elt)), 2))
+      @test exp.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(exp(zero(elt)))}(2))
+      @test cis.(a_ones) ≡ DiagonalMatrix(Fill(cis(one(elt)), 2))
+      @test cis.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(cis(zero(elt)))}(2))
+      @test log.(a_ones) ≡ DiagonalMatrix(Zeros{typeof(log(one(elt)))}(2))
+      @test log.(a_zeros) ≡ DiagonalMatrix(Fill(log(zero(elt)), 2))
+      @test cos.(a_ones) ≡ DiagonalMatrix(Fill(cos(one(elt)), 2))
+      @test cos.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(cos(zero(elt)))}(2))
+      @test sin.(a_ones) ≡ DiagonalMatrix(Fill(sin(one(elt)), 2))
+      @test sin.(a_zeros) ≡ DiagonalMatrix(Zeros{typeof(sin(zero(elt)))}(2))
+      @test tan.(a_ones) ≡ DiagonalMatrix(Fill(tan(one(elt)), 2))
+      @test tan.(a_zeros) ≡ DiagonalMatrix(Zeros{typeof(tan(zero(elt)))}(2))
+      @test sec.(a_ones) ≡ DiagonalMatrix(Fill(sec(one(elt)), 2))
+      @test sec.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(sec(zero(elt)))}(2))
+      @test cosh.(a_ones) ≡ DiagonalMatrix(Fill(cosh(one(elt)), 2))
+      @test cosh.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(cosh(zero(elt)))}(2))
     end
     @testset "LinearAlgebra matrix properties" begin
       @test ishermitian(DiagonalMatrix([1, 2]))
