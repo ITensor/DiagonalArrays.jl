@@ -142,6 +142,17 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}()))
     end
+    @testset "Conversion" begin
+      a = DiagonalMatrix(randn(elt, 2))
+      @test DiagonalMatrix{elt}(a) ≡ a
+      @test DiagonalMatrix{ComplexF64}(a) == DiagonalMatrix(ComplexF64.(diagview(a)))
+      @test DiagonalArray{ComplexF64}(a) == DiagonalMatrix(ComplexF64.(diagview(a)))
+      @test DiagonalArray(a) ≡ a
+      @test AbstractMatrix{elt}(a) ≡ a
+      @test AbstractMatrix{ComplexF64}(a) == DiagonalMatrix(ComplexF64.(diagview(a)))
+      @test AbstractArray{elt}(a) ≡ a
+      @test AbstractArray{ComplexF64}(a) == DiagonalMatrix(ComplexF64.(diagview(a)))
+    end
     @testset "Slicing" begin
       # Slicing that preserves the diagonal structure.
       a = DiagonalMatrix(randn(elt, 3))
