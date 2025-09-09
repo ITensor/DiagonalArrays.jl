@@ -68,31 +68,56 @@ end
 
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
-function DiagonalArray{T,N,D}(
-  init::ShapeInitializer, unstored::Unstored
-) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D}(
+function DiagonalArray{T,N,D,U}(
+  init::ShapeInitializer, unstored::Unstored{T,N,U}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(
     construct(D, init, diaglength_from_shape(axes(unstored))), unstored
   )
+end
+function DiagonalArray{T,N,D}(
+  init::ShapeInitializer, unstored::Unstored{T,N,U}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(init, unstored)
 end
 
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
 # These versions use the default unstored type `Zeros{T,N}`.
+function DiagonalArray{T,N,D,U}(
+  init::ShapeInitializer, ax::Tuple{Vararg{AbstractUnitRange{<:Integer}}}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(init, Unstored(U(ax)))
+end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, ax::Tuple{Vararg{AbstractUnitRange{<:Integer}}}
 ) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D}(init, Unstored(Zeros{T,N}(ax)))
+end
+function DiagonalArray{T,N,D,U}(
+  init::ShapeInitializer, ax::AbstractUnitRange{<:Integer}...
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(init, ax)
 end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, ax::AbstractUnitRange{<:Integer}...
 ) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D}(init, ax)
 end
+function DiagonalArray{T,N,D,U}(
+  init::ShapeInitializer, sz::Tuple{Integer,Vararg{Integer}}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(init, Base.OneTo.(sz))
+end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, sz::Tuple{Integer,Vararg{Integer}}
 ) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D}(init, Base.OneTo.(sz))
+end
+function DiagonalArray{T,N,D,U}(
+  init::ShapeInitializer, sz1::Integer, sz_rest::Integer...
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
+  return DiagonalArray{T,N,D,U}(init, (sz1, sz_rest...))
 end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, sz1::Integer, sz_rest::Integer...

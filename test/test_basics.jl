@@ -112,12 +112,18 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
 
       # Special constructors for immutable diagonal.
       init = ShapeInitializer()
+      U = Zeros{UInt32,2,Tuple{Base.OneTo{Int},Base.OneTo{Int}}}
       @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, (2, 2)) ≡
         DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, 2, 2) ≡
-        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2)))
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2))) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32},U}(init, Base.OneTo.((2, 2))) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32},U}(init, Base.OneTo.((2, 2))...) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32},U}(init, (2, 2)) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32},U}(init, 2, 2) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32},U}(init, Unstored(Zeros{UInt32}(2, 2)))
 
       init = ShapeInitializer()
       @test DiagonalMatrix(Ones{elt}(2)) ≡
