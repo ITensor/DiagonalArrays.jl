@@ -27,7 +27,14 @@ function DiagonalArray(::UndefInitializer, unstored::Unstored)
   return DiagonalArray(Vector{eltype(unstored)}(undef, minimum(size(unstored))), unstored)
 end
 
-function construct_from_length(vect::Type{<:AbstractVector}, len::Integer)
+# Indicate we will construct an array just from the shape,
+# for example for a Base.OneTo or FillArrays.Ones or Zeros.
+# All the elements should be uniquely defined by the input axes.
+struct ShapeInitializer end
+
+# This is used to create custom constructors for arrays,
+# in this case a generic constructor of a vector from a length.
+function construct(vect::Type{<:AbstractVector}, ::ShapeInitializer, len::Integer)
   if applicable(vect, len)
     return vect(len)
   elseif applicable(vect, (Base.OneTo(len),))
@@ -40,51 +47,57 @@ end
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
 function DiagonalArray{T,N,D,U}(
-  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
+  init::ShapeInitializer,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray(construct_from_length(D, minimum(length, ax)), Unstored(U(ax)))
+  return DiagonalArray(construct(D, init, minimum(length, ax)), Unstored(U(ax)))
 end
 function DiagonalArray{T,N,D,U}(
-  ax1::AbstractUnitRange{<:Integer}, ax_rest::Vararg{AbstractUnitRange{<:Integer}}
+  init::ShapeInitializer,
+  ax1::AbstractUnitRange{<:Integer},
+  ax_rest::Vararg{AbstractUnitRange{<:Integer}},
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}((ax1, ax_rest...))
+  return DiagonalArray{T,N,D,U}(init, (ax1, ax_rest...))
 end
 function DiagonalArray{T,N,D,U}(
-  sz::Tuple{Integer,Vararg{Integer}}
+  init::ShapeInitializer, sz::Tuple{Integer,Vararg{Integer}}
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}(Base.OneTo.(sz))
+  return DiagonalArray{T,N,D,U}(init, Base.OneTo.(sz))
 end
 function DiagonalArray{T,N,D,U}(
-  sz1::Integer, sz_rest::Integer...
+  init::ShapeInitializer, sz1::Integer, sz_rest::Integer...
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}((sz1, sz_rest...))
+  return DiagonalArray{T,N,D,U}(init, (sz1, sz_rest...))
 end
 
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
 # These versions use the default unstored type `Zeros{T,N}`.
 function DiagonalArray{T,N,D}(
-  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
+  init::ShapeInitializer,
+  ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
 ) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D,Zeros{T,N}}(ax)
+  return DiagonalArray{T,N,D,Zeros{T,N}}(init, ax)
 end
 function DiagonalArray{T,N,D}(
-  ax1::AbstractUnitRange{<:Integer}, ax_rest::Vararg{AbstractUnitRange{<:Integer}}
+  init::ShapeInitializer,
+  ax1::AbstractUnitRange{<:Integer},
+  ax_rest::Vararg{AbstractUnitRange{<:Integer}},
 ) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D,Zeros{T,N}}(ax1, ax_rest...)
+  return DiagonalArray{T,N,D,Zeros{T,N}}(init, ax1, ax_rest...)
 end
 function DiagonalArray{T,N,D}(
-  sz::Tuple{Integer,Vararg{Integer}}
+  init::ShapeInitializer, sz::Tuple{Integer,Vararg{Integer}}
 ) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D,Zeros{T,N}}(sz)
+  return DiagonalArray{T,N,D,Zeros{T,N}}(init, sz)
 end
 function DiagonalArray{T,N,D}(
-  sz1::Integer, sz_rest::Integer...
+  init::ShapeInitializer, sz1::Integer, sz_rest::Integer...
 ) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D,Zeros{T,N}}(sz1, sz_rest...)
+  return DiagonalArray{T,N,D,Zeros{T,N}}(init, sz1, sz_rest...)
 end
 
-# Constructors accepting axes.
+# Constructor from diagonal entries accepting axes.
 function DiagonalArray{T,N}(
   diag::AbstractVector,
   ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}},
@@ -219,7 +232,22 @@ function DiagonalArray{T}(::UndefInitializer, dims::Vararg{Int,N}) where {T,N}
   return DiagonalArray{T,N}(undef, dims)
 end
 
-# 0-dim limit.
+# 0-dim from diag.
+function DiagonalArray{T,0,D}(
+  diag::AbstractVector, ax::Tuple{}
+) where {T,D<:AbstractVector{T}}
+  error()
+end
+function DiagonalArray{T,0}(diag::AbstractVector, ax::Tuple{}) where {T}
+  diag′ = convert(AbstractVector{T}, diag)
+  D = typeof(diag′)
+  return DiagonalArray{T,0,D}(diag, ax)
+end
+function DiagonalArray{T,0}(diag::AbstractVector) where {T}
+  return DiagonalArray{T,0}(diag, ())
+end
+
+# 0-dim undef.
 function DiagonalArray{T,0,D}(
   ::UndefInitializer, ax::Tuple{}
 ) where {T,D<:AbstractVector{T}}

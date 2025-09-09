@@ -2,6 +2,7 @@ using Test: @test, @testset, @test_broken, @inferred
 using DerivableInterfaces: permuteddims
 using DiagonalArrays:
   DiagonalArrays,
+  ShapeInitializer,
   Delta,
   DeltaMatrix,
   DiagonalArray,
@@ -107,15 +108,20 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
         eltype(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
 
       # Special constructors for immutable diagonal.
+      init = ShapeInitializer()
       @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(Base.OneTo.((2, 2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(Base.OneTo.((2, 2))...) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}((2, 2)) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(2, 2) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(Base.OneTo.((2, 2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(Base.OneTo.((2, 2))...) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}((2, 2)) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(2, 2)
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
+          init, Base.OneTo.((2, 2))
+        ) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
+          init, Base.OneTo.((2, 2))...
+        ) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, (2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, 2, 2) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, (2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2)
     end
     @testset "permutedims" begin
       a = DiagonalArray(randn(elt, 2), (2, 3, 4))
