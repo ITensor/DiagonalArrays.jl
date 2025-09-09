@@ -27,12 +27,22 @@ function DiagonalArray(::UndefInitializer, unstored::Unstored)
   return DiagonalArray(Vector{eltype(unstored)}(undef, minimum(size(unstored))), unstored)
 end
 
+function construct_from_length(vect::Type{<:AbstractVector}, len::Integer)
+  if applicable(vect, len)
+    return vect(len)
+  elseif applicable(vect, (Base.OneTo(len),))
+    return vect((Base.OneTo(len),))
+  else
+    error(lazy"Can't construct $(vect) from length.")
+  end
+end
+
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
 function DiagonalArray{T,N,D,U}(
   ax::Tuple{AbstractUnitRange{<:Integer},Vararg{AbstractUnitRange{<:Integer}}}
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray(D((Base.OneTo(minimum(length, ax)),)), Unstored(U(ax)))
+  return DiagonalArray(construct_from_length(D, minimum(length, ax)), Unstored(U(ax)))
 end
 function DiagonalArray{T,N,D,U}(
   ax1::AbstractUnitRange{<:Integer}, ax_rest::Vararg{AbstractUnitRange{<:Integer}}
@@ -40,12 +50,12 @@ function DiagonalArray{T,N,D,U}(
   return DiagonalArray{T,N,D,U}((ax1, ax_rest...))
 end
 function DiagonalArray{T,N,D,U}(
-  sz::Tuple{Integer,Vararg{AbstractUnitRange{<:Integer}}}
+  sz::Tuple{Integer,Vararg{Integer}}
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
   return DiagonalArray{T,N,D,U}(Base.OneTo.(sz))
 end
 function DiagonalArray{T,N,D,U}(
-  sz1::Integer, sz_rest::Vararg{Integer}
+  sz1::Integer, sz_rest::Integer...
 ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
   return DiagonalArray{T,N,D,U}((sz1, sz_rest...))
 end
@@ -64,12 +74,12 @@ function DiagonalArray{T,N,D}(
   return DiagonalArray{T,N,D,Zeros{T,N}}(ax1, ax_rest...)
 end
 function DiagonalArray{T,N,D}(
-  sz::Tuple{Integer,Vararg{AbstractUnitRange{<:Integer}}}
+  sz::Tuple{Integer,Vararg{Integer}}
 ) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D,Zeros{T,N}}(sz)
 end
 function DiagonalArray{T,N,D}(
-  sz1::Integer, sz_rest::Vararg{Integer}
+  sz1::Integer, sz_rest::Integer...
 ) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D,Zeros{T,N}}(sz1, sz_rest...)
 end

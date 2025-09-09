@@ -15,7 +15,7 @@ using DiagonalArrays:
   diagonal,
   diagonaltype,
   diagview
-using FillArrays: Fill, Ones
+using FillArrays: Fill, Ones, Zeros
 using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
 using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
 
@@ -105,6 +105,17 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
         eltype(DiagonalArray{elt,2}(undef, (2, 2))) ≡
         eltype(DiagonalArray{elt,2}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
         eltype(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
+
+      # Special constructors for immutable diagonal.
+      @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(Base.OneTo.((2, 2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(Base.OneTo.((2, 2))...) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}((2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(2, 2) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(Base.OneTo.((2, 2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(Base.OneTo.((2, 2))...) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}((2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(2, 2)
     end
     @testset "permutedims" begin
       a = DiagonalArray(randn(elt, 2), (2, 3, 4))
