@@ -9,6 +9,7 @@ using DiagonalArrays:
   DiagonalMatrix,
   ScaledDelta,
   ScaledDeltaMatrix,
+  Unstored,
   δ,
   delta,
   diagindices,
@@ -110,18 +111,11 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
       # Special constructors for immutable diagonal.
       init = ShapeInitializer()
       @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
-          init, Base.OneTo.((2, 2))
-        ) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
-          init, Base.OneTo.((2, 2))...
-        ) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, (2, 2)) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, 2, 2) ≡
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, (2, 2)) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2)
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2)))
 
       # 0-dim constructors
       v = randn(elt, 1)
@@ -144,10 +138,9 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
       # Special constructors for immutable diagonal.
       init = ShapeInitializer()
       @test DiagonalArray{<:Any,0}(Base.OneTo(UInt32(1))) ≡
-        DiagonalArray{UInt32,0,Base.OneTo{UInt32},Zeros{UInt32,0}}(init, ()) ≡
-        DiagonalArray{UInt32,0,Base.OneTo{UInt32},Zeros{UInt32,0}}(init) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, ()) ≡
-        DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init)
+        DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init) ≡
+        DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}()))
     end
     @testset "Slicing" begin
       # Slicing that preserves the diagonal structure.

@@ -9,18 +9,16 @@ function diaglength_from_shape(
 end
 diaglength_from_shape(sz::Tuple{}) = 1
 
-function _DiagonalArray end
-
-struct DiagonalArray{T,N,Diag<:AbstractVector{T},Unstored<:AbstractArray{T,N}} <:
+struct DiagonalArray{T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}} <:
        AbstractDiagonalArray{T,N}
-  diag::Diag
-  unstored::Unstored
-  global @inline function _DiagonalArray(
-    diag::Diag, unstored::Unstored
-  ) where {T,N,Diag<:AbstractVector{T},Unstored<:AbstractArray{T,N}}
+  diag::D
+  unstored::U
+  function DiagonalArray{T,N,D,U}(
+    diag::AbstractVector, unstored::Unstored
+  ) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
     length(diag) == diaglength_from_shape(size(unstored)) ||
       throw(ArgumentError("Length of diagonals doesn't match dimensions"))
-    return new{T,N,Diag,Unstored}(diag, unstored)
+    return new{T,N,D,U}(diag, parent(unstored))
   end
 end
 
@@ -28,9 +26,31 @@ SparseArraysBase.unstored(a::DiagonalArray) = a.unstored
 Base.size(a::DiagonalArray) = size(unstored(a))
 Base.axes(a::DiagonalArray) = axes(unstored(a))
 
-function DiagonalArray(diag::AbstractVector, unstored::Unstored)
-  return _DiagonalArray(diag, parent(unstored))
+function DiagonalArray{T,N,D}(
+  diag::D, unstored::Unstored{T,N}
+) where {T,N,D<:AbstractVector{T}}
+  U = typeof(parent(unstored))
+  return DiagonalArray{T,N,D,U}(diag, unstored)
 end
+function DiagonalArray{T,N}(diag::AbstractVector{T}, unstored::Unstored{T,N}) where {T,N}
+  D = typeof(diag)
+  U = typeof(parent(unstored))
+  return DiagonalArray{T,N,D,U}(diag, unstored)
+end
+function DiagonalArray{T}(diag::AbstractVector{T}, unstored::Unstored{T}) where {T}
+  N = ndims(unstored)
+  D = typeof(diag)
+  U = typeof(parent(unstored))
+  return DiagonalArray{T,N,D,U}(diag, unstored)
+end
+function DiagonalArray(diag::AbstractVector, unstored::Unstored)
+  T = eltype(diag)
+  N = ndims(unstored)
+  D = typeof(diag)
+  U = typeof(parent(unstored))
+  return DiagonalArray{T,N,D,U}(diag, unstored)
+end
+
 function DiagonalArray(::UndefInitializer, unstored::Unstored)
   return DiagonalArray(
     Vector{eltype(unstored)}(undef, diaglength_from_shape(size(unstored))), unstored
@@ -56,25 +76,12 @@ end
 
 # This helps to support diagonals where the elements are known
 # from the types, for example diagonals that are `Zeros` and `Ones`.
-function DiagonalArray{T,N,D,U}(
-  init::ShapeInitializer, ax::Tuple{Vararg{AbstractUnitRange{<:Integer}}}
-) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray(construct(D, init, diaglength_from_shape(ax)), Unstored(U(ax)))
-end
-function DiagonalArray{T,N,D,U}(
-  init::ShapeInitializer, ax::AbstractUnitRange{<:Integer}...
-) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}(init, ax)
-end
-function DiagonalArray{T,N,D,U}(
-  init::ShapeInitializer, sz::Tuple{Integer,Vararg{Integer}}
-) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}(init, Base.OneTo.(sz))
-end
-function DiagonalArray{T,N,D,U}(
-  init::ShapeInitializer, sz1::Integer, sz_rest::Integer...
-) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
-  return DiagonalArray{T,N,D,U}(init, (sz1, sz_rest...))
+function DiagonalArray{T,N,D}(
+  init::ShapeInitializer, unstored::Unstored
+) where {T,N,D<:AbstractVector{T}}
+  return DiagonalArray{T,N,D}(
+    construct(D, init, diaglength_from_shape(axes(unstored))), unstored
+  )
 end
 
 # This helps to support diagonals where the elements are known
@@ -83,7 +90,7 @@ end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, ax::Tuple{Vararg{AbstractUnitRange{<:Integer}}}
 ) where {T,N,D<:AbstractVector{T}}
-  return DiagonalArray{T,N,D,Zeros{T,N,typeof(ax)}}(init, ax)
+  return DiagonalArray{T,N,D}(init, Unstored(Zeros{T,N}(ax)))
 end
 function DiagonalArray{T,N,D}(
   init::ShapeInitializer, ax::AbstractUnitRange{<:Integer}...
