@@ -236,43 +236,6 @@ function DiagonalArray{T}(::UndefInitializer, dims::Vararg{Int,N}) where {T,N}
   return DiagonalArray{T,N}(undef, dims)
 end
 
-# 0-dim from diag.
-## function DiagonalArray{T,0,D}(
-##   diag::AbstractVector, ax::Tuple{}
-## ) where {T,D<:AbstractVector{T}}
-##   error()
-## end
-## function DiagonalArray{T,0}(diag::AbstractVector, ax::Tuple{}) where {T}
-##   diag′ = convert(AbstractVector{T}, diag)
-##   D = typeof(diag′)
-##   return DiagonalArray{T,0,D}(diag, ax)
-## end
-## function DiagonalArray{T,0}(diag::AbstractVector) where {T}
-##   return DiagonalArray{T,0}(diag, ())
-## end
-
-## # 0-dim undef.
-## function DiagonalArray{T,0,D}(
-##   ::UndefInitializer, ax::Tuple{}
-## ) where {T,D<:AbstractVector{T}}
-##   return DiagonalArray{T,0,D}(D(undef, 0), ax)
-## end
-## function DiagonalArray{T,0,D}(::UndefInitializer) where {T,D<:AbstractVector{T}}
-##   return DiagonalArray{T,0,D}(undef, ())
-## end
-## function DiagonalArray{T,0}(::UndefInitializer, ax::Tuple{}) where {T}
-##   return DiagonalArray{T,0,Vector{T}}(undef, ax)
-## end
-## function DiagonalArray{T,0}(::UndefInitializer) where {T}
-##   return DiagonalArray{T,0}(undef, ())
-## end
-## function DiagonalArray{T}(::UndefInitializer, axes::Tuple{}) where {T}
-##   return DiagonalArray{T,0}(undef, ())
-## end
-## function DiagonalArray{T}(::UndefInitializer) where {T}
-##   return DiagonalArray{T}(undef, ())
-## end
-
 # Axes version
 function DiagonalArray{T}(
   ::UndefInitializer, axes::Tuple{Base.OneTo{Int},Vararg{Base.OneTo{Int}}}
@@ -327,10 +290,18 @@ function _view_diag(a::DiagonalArray, I...)
   ax = _diag_axes(a, I...)
   return DiagonalArray(view(diagview(a), Base.OneTo(minimum(length, I))), ax)
 end
+function _view_diag(a::DiagonalArray, I1::Base.Slice, Irest::Base.Slice...)
+  ax = _diag_axes(a, I1, Irest...)
+  return DiagonalArray(view(diagview(a), :), ax)
+end
 # A slice that preserves the diagonal structure.
 function _getindex_diag(a::DiagonalArray, I...)
   ax = _diag_axes(a, I...)
   return DiagonalArray(diagview(a)[Base.OneTo(minimum(length, I))], ax)
+end
+function _getindex_diag(a::DiagonalArray, I1::Base.Slice, Irest::Base.Slice...)
+  ax = _diag_axes(a, I1, Irest...)
+  return DiagonalArray(diagview(a)[:], ax)
 end
 function Base.view(a::DiagonalArray, I...)
   I′ = to_indices(a, I)

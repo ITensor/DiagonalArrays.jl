@@ -17,7 +17,7 @@ using DiagonalArrays:
   diagonaltype,
   diagview
 using FillArrays: Fill, Ones, Zeros
-using SparseArraysBase: SparseArrayDOK, sparsezeros, storedlength
+using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
 using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
 
 @testset "Test DiagonalArrays" begin
@@ -148,6 +148,40 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
         DiagonalArray{UInt32,0,Base.OneTo{UInt32},Zeros{UInt32,0}}(init) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, ()) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init)
+    end
+    @testset "Slicing" begin
+      # Slicing that preserves the diagonal structure.
+      a = DiagonalMatrix(randn(elt, 3))
+      b = @view a[:, :]
+      @test b isa DiagonalMatrix{elt,<:SubArray{elt,1}}
+      @test diagview(b) ≡ view(diagview(a), :)
+
+      a = DiagonalMatrix(randn(elt, 3))
+      b = @view a[Base.OneTo(2), Base.OneTo(2)]
+      @test b isa DiagonalMatrix{elt,<:SubArray{elt,1}}
+      @test diagview(b) ≡ view(diagview(a), Base.OneTo(2))
+
+      a = DiagonalMatrix(randn(elt, 3))
+      b = a[:, :]
+      @test typeof(b) == typeof(a)
+      @test diagview(b) == diagview(a)
+
+      a = DiagonalMatrix(randn(elt, 3))
+      b = a[Base.OneTo(2), Base.OneTo(2)]
+      @test typeof(b) == typeof(a)
+      @test diagview(b) == diagview(a)[Base.OneTo(2)]
+
+      # Slicing that doesn't preserve the diagonal structure.
+      a = DiagonalMatrix(randn(elt, 3))
+      b = @view a[2:3, 2:3]
+      @test b isa SubArray
+      @test b == Matrix(a)[2:3, 2:3]
+
+      a = DiagonalMatrix(randn(elt, 3))
+      b = a[2:3, 2:3]
+      @test b isa SparseMatrixDOK{elt}
+      @test b == Matrix(a)[2:3, 2:3]
+      @test storedlength(b) == 2
     end
     @testset "permutedims" begin
       a = DiagonalArray(randn(elt, 2), (2, 3, 4))
