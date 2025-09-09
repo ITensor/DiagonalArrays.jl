@@ -43,6 +43,9 @@ function SparseArraysBase.getstoredindex(
   # allequal(I) || error("Not a diagonal index.")
   return getdiagindex(a, first(I))
 end
+function SparseArraysBase.getstoredindex(a::AbstractDiagonalArray{<:Any,0})
+  return getdiagindex(a, 1)
+end
 function SparseArraysBase.setstoredindex!(
   a::AbstractDiagonalArray{<:Any,N}, value, I::Vararg{Int,N}
 ) where {N}
@@ -50,6 +53,10 @@ function SparseArraysBase.setstoredindex!(
   # in SparseArraysBase.jl.
   # allequal(I) || error("Not a diagonal index.")
   setdiagindex!(a, value, first(I))
+  return a
+end
+function SparseArraysBase.setstoredindex!(a::AbstractDiagonalArray{<:Any,0}, value)
+  setdiagindex!(a, value, 1)
   return a
 end
 function SparseArraysBase.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)

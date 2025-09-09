@@ -122,6 +122,40 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, (2, 2)) ≡
         DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2)
+
+      # 0-dim constructors
+      v = randn(elt, 1)
+      @test DiagonalArray(v) ≡
+        DiagonalArray(v, ()) ≡
+        DiagonalArray{elt}(v) ≡
+        DiagonalArray{elt}(v, ()) ≡
+        DiagonalArray{elt,0}(v) ≡
+        DiagonalArray{elt,0}(v, ())
+      @test size(DiagonalArray{elt}(undef)) ≡
+        size(DiagonalArray{elt}(undef, ())) ≡
+        size(DiagonalArray{elt,0}(undef)) ≡
+        size(DiagonalArray{elt,0}(undef, ()))
+      @test elt ≡
+        eltype(DiagonalArray{elt}(undef)) ≡
+        eltype(DiagonalArray{elt}(undef, ())) ≡
+        eltype(DiagonalArray{elt,0}(undef)) ≡
+        eltype(DiagonalArray{elt,0}(undef, ()))
+
+      # Special constructors for immutable diagonal.
+      init = ShapeInitializer()
+      @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
+          init, Base.OneTo.((2, 2))
+        ) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(
+          init, Base.OneTo.((2, 2))...
+        ) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, (2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32},Zeros{UInt32,2}}(init, 2, 2) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, (2, 2)) ≡
+        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2)
     end
     @testset "permutedims" begin
       a = DiagonalArray(randn(elt, 2), (2, 3, 4))
