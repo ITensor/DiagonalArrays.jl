@@ -34,21 +34,15 @@ function DiagonalArray{T,N,D}(
 end
 function DiagonalArray{T,N}(diag::AbstractVector{T}, unstored::Unstored{T,N}) where {T,N}
   D = typeof(diag)
-  U = typeof(parent(unstored))
-  return DiagonalArray{T,N,D,U}(diag, unstored)
+  return DiagonalArray{T,N,D}(diag, unstored)
 end
-function DiagonalArray{T}(diag::AbstractVector{T}, unstored::Unstored{T}) where {T}
-  N = ndims(unstored)
+function DiagonalArray{T}(diag::AbstractVector{T}, unstored::Unstored{T,N}) where {T,N}
   D = typeof(diag)
   U = typeof(parent(unstored))
   return DiagonalArray{T,N,D,U}(diag, unstored)
 end
-function DiagonalArray(diag::AbstractVector, unstored::Unstored)
-  T = eltype(diag)
-  N = ndims(unstored)
-  D = typeof(diag)
-  U = typeof(parent(unstored))
-  return DiagonalArray{T,N,D,U}(diag, unstored)
+function DiagonalArray(diag::AbstractVector{T}, unstored::Unstored{T}) where {T}
+  return DiagonalArray{T}(diag, unstored)
 end
 
 function DiagonalArray(::UndefInitializer, unstored::Unstored)

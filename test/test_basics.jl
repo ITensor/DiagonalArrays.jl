@@ -19,7 +19,8 @@ using DiagonalArrays:
   diagview
 using FillArrays: Fill, Ones, Zeros
 using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
-using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric, pinv
+using LinearAlgebra:
+  Diagonal, det, ishermitian, isposdef, issymmetric, logdet, mul!, pinv, tr
 
 @testset "Test DiagonalArrays" begin
   @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -141,6 +142,13 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric, pinv
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, ()) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init) ≡
         DiagonalArray{UInt32,0,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}()))
+    end
+    @testset "0-dim operations" begin
+      diag = randn(elt, 1)
+      a = DiagonalArray(diag)
+      @test a[] == diag[1]
+      a[] = 2
+      @test a[] == 2
     end
     @testset "Conversion" begin
       a = DiagonalMatrix(randn(elt, 2))
@@ -272,6 +280,68 @@ using LinearAlgebra: Diagonal, mul!, ishermitian, isposdef, issymmetric, pinv
       @test isposdef(DiagonalMatrix([[1 0; 0 1], [2 0; 0 2]]))
       @test !isposdef(DiagonalMatrix([randn(2, 2), randn(3, 3)]))
       @test !isposdef(DiagonalMatrix([randn(2, 2), randn(2, 3)]))
+    end
+    @testset "LinearAlgebra matrix functions" begin
+      diag = randn(elt, 2)
+      a = DiagonalMatrix(diag)
+      @test tr(a) ≈ sum(diag)
+      @test det(a) ≈ prod(diag)
+
+      # Use a positive diagonal in order to take the `log`.
+      diag = rand(elt, 2)
+      a = DiagonalMatrix(diag)
+      @test real(logdet(a)) ≈ real(sum(log, diag))
+      @test imag(logdet(a)) ≈ rem2pi(imag(sum(log, diag)), RoundNearest)
+
+      for f in [
+        :exp,
+        :cis,
+        :log,
+        :sqrt,
+        :cos,
+        :sin,
+        :tan,
+        :csc,
+        :sec,
+        :cot,
+        :cosh,
+        :sinh,
+        :tanh,
+        :csch,
+        :sech,
+        :coth,
+        :acos,
+        :asin,
+        :atan,
+        :acot,
+        :asinh,
+        :atanh,
+        :acsch,
+        :asech,
+      ]
+        @eval begin
+          a = DiagonalMatrix(rand($elt, 2))
+          @test $f(a) ≈ DiagonalMatrix($f.(diagview(a)))
+        end
+      end
+
+      for f in [:acsc, :asec, :acosh, :acoth]
+        @eval begin
+          a = DiagonalMatrix(inv.(rand($elt, 2)))
+          @test $f(a) ≈ DiagonalMatrix($f.(diagview(a)))
+        end
+      end
+
+      if elt <: Real
+        a = DiagonalMatrix(randn(elt, 2))
+        @test cbrt(a) ≈ DiagonalMatrix(cbrt.(diagview(a)))
+      end
+
+      a = DiagonalMatrix(randn(elt, 2))
+      @test inv(a) ≈ DiagonalMatrix(inv.(diagview(a)))
+
+      a = DiagonalMatrix(randn(elt, 2))
+      @test pinv(a) ≈ DiagonalMatrix(pinv.(diagview(a)))
     end
     @testset "Matrix multiplication" begin
       a1 = DiagonalArray{elt}(undef, (2, 3))

@@ -86,7 +86,7 @@ function LinearAlgebra.logdet(a::DiagonalMatrix{<:Complex})
 end
 
 # Matrix functions
-for f in (
+for f in [
   :exp,
   :cis,
   :log,
@@ -115,7 +115,7 @@ for f in (
   :acsch,
   :asech,
   :acoth,
-)
+]
   @eval begin
     function Base.$f(a::DiagonalMatrix)
       checksquare(a)
