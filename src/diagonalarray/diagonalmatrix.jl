@@ -58,3 +58,91 @@ function LinearAlgebra.mul!(
   d_dest .= d1 .* d2 .* α .+ d_dest .* β
   return a_dest
 end
+
+# Adapted from https://github.com/JuliaLang/LinearAlgebra.jl/blob/release-1.12/src/diagonal.jl#L866-L928.
+function LinearAlgebra.tr(a::DiagonalMatrix)
+  checksquare(a)
+  # TODO: Define as `sum(tr, diagview(a))` like LinearAlgebra.jl?
+  return sum(diagview(a))
+end
+# TODO: Special case for FillArrays diagonals.
+function LinearAlgebra.det(a::DiagonalMatrix)
+  checksquare(a)
+  # TODO: Define as `prod(det, diagview(a))` like LinearAlgebra.jl?
+  return prod(diagview(a))
+end
+# TODO: Special case for FillArrays diagonals.
+function LinearAlgebra.logabsdet(a::DiagonalMatrix)
+  checksquare(a)
+  return mapreduce(((d1, s1), (d2, s2)) -> (d1 + d2, s1 * s2), diagview(a)) do x
+    return (log(abs(x)), sign(x))
+  end
+end
+# TODO: Special case for FillArrays diagonals.
+function LinearAlgebra.logdet(a::DiagonalMatrix{<:Complex})
+  checksquare(a)
+  z = sum(log, diagview(a))
+  return complex(real(z), rem2pi(imag(z), RoundNearest))
+end
+
+# Matrix functions
+for f in [
+  :exp,
+  :cis,
+  :log,
+  :sqrt,
+  :cos,
+  :sin,
+  :tan,
+  :csc,
+  :sec,
+  :cot,
+  :cosh,
+  :sinh,
+  :tanh,
+  :csch,
+  :sech,
+  :coth,
+  :acos,
+  :asin,
+  :atan,
+  :acsc,
+  :asec,
+  :acot,
+  :acosh,
+  :asinh,
+  :atanh,
+  :acsch,
+  :asech,
+  :acoth,
+]
+  @eval begin
+    function Base.$f(a::DiagonalMatrix)
+      checksquare(a)
+      return DiagonalMatrix(_broadcast($f, diagview(a)), axes(a))
+    end
+  end
+end
+
+# Cube root of a real-valued diagonal matrix
+function Base.cbrt(a::DiagonalMatrix{<:Real})
+  checksquare(a)
+  return DiagonalMatrix(_broadcast(cbrt, diagview(a)), axes(a))
+end
+
+function LinearAlgebra.inv(a::DiagonalMatrix)
+  checksquare(a)
+  # `DiagonalArrays._broadcast` works around issues like https://github.com/JuliaArrays/FillArrays.jl/issues/416
+  # when the diagonal is a FillArray or similar lazy array.
+  d⁻¹ = _broadcast(inv, diagview(a))
+  any(isinf, d⁻¹) && error("Singular Exception")
+  return DiagonalMatrix(d⁻¹, axes(a))
+end
+
+# TODO: Support `atol` and `rtol` keyword arguments:
+# https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.pinv
+using LinearAlgebra: pinv
+function LinearAlgebra.pinv(a::DiagonalMatrix)
+  checksquare(a)
+  return DiagonalMatrix(_broadcast(pinv, diagview(a)), axes(a))
+end

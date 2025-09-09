@@ -43,6 +43,9 @@ function SparseArraysBase.getstoredindex(
   # allequal(I) || error("Not a diagonal index.")
   return getdiagindex(a, first(I))
 end
+function SparseArraysBase.getstoredindex(a::AbstractDiagonalArray{<:Any,0})
+  return getdiagindex(a, 1)
+end
 function SparseArraysBase.setstoredindex!(
   a::AbstractDiagonalArray{<:Any,N}, value, I::Vararg{Int,N}
 ) where {N}
@@ -50,6 +53,10 @@ function SparseArraysBase.setstoredindex!(
   # in SparseArraysBase.jl.
   # allequal(I) || error("Not a diagonal index.")
   setdiagindex!(a, value, first(I))
+  return a
+end
+function SparseArraysBase.setstoredindex!(a::AbstractDiagonalArray{<:Any,0}, value)
+  setdiagindex!(a, value, 1)
   return a
 end
 function SparseArraysBase.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)
@@ -99,25 +106,3 @@ function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:DiagonalArrayStyle}
   copyto!(diagview(dest), broadcasted_diagview(bc))
   return dest
 end
-
-## SparseArraysBase.StorageIndex(i::DiagIndex) = StorageIndex(index(i))
-
-## function Base.getindex(a::AbstractDiagonalArray, i::DiagIndex)
-##   return a[StorageIndex(i)]
-## end
-
-## function Base.setindex!(a::AbstractDiagonalArray, value, i::DiagIndex)
-##   a[StorageIndex(i)] = value
-##   return a
-## end
-
-## SparseArraysBase.StorageIndices(i::DiagIndices) = StorageIndices(indices(i))
-
-## function Base.getindex(a::AbstractDiagonalArray, i::DiagIndices)
-##   return a[StorageIndices(i)]
-## end
-
-## function Base.setindex!(a::AbstractDiagonalArray, value, i::DiagIndices)
-##   a[StorageIndices(i)] = value
-##   return a
-## end
