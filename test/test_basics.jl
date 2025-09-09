@@ -16,7 +16,8 @@ using DiagonalArrays:
   diaglength,
   diagonal,
   diagonaltype,
-  diagview
+  diagview,
+  getdiagindices
 using FillArrays: Fill, Ones, Zeros
 using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
 using LinearAlgebra:
@@ -104,19 +105,29 @@ using LinearAlgebra:
         eltype(DiagonalArray{elt}(undef, (2, 2))) ≡
         eltype(DiagonalArray{elt}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
         eltype(DiagonalArray{elt}(undef, (Base.OneTo(2), Base.OneTo(2)))) ≡
-        eltype(DiagonalArray{elt,2}(undef, 2, 2)) ≡
-        eltype(DiagonalArray{elt,2}(undef, (2, 2))) ≡
-        eltype(DiagonalArray{elt,2}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
-        eltype(DiagonalArray{elt,2}(undef, (Base.OneTo(2), Base.OneTo(2))))
+        eltype(DiagonalMatrix{elt}(undef, 2, 2)) ≡
+        eltype(DiagonalMatrix{elt}(undef, (2, 2))) ≡
+        eltype(DiagonalMatrix{elt}(undef, Base.OneTo(2), Base.OneTo(2))) ≡
+        eltype(DiagonalMatrix{elt}(undef, (Base.OneTo(2), Base.OneTo(2))))
 
       # Special constructors for immutable diagonal.
       init = ShapeInitializer()
       @test DiagonalMatrix(Base.OneTo(UInt32(2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, (2, 2)) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, 2, 2) ≡
-        DiagonalArray{UInt32,2,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2)))
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, (2, 2)) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, 2, 2) ≡
+        DiagonalMatrix{UInt32,Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2)))
+      @test DiagonalMatrix(Ones{elt}(2)) ≡
+        DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(init, Base.OneTo.((2, 2))) ≡
+        DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(
+          init, Base.OneTo.((2, 2))...
+        ) ≡
+        DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(init, (2, 2)) ≡
+        DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(init, 2, 2) ≡
+        DiagonalMatrix{elt,Ones{elt,1,Tuple{Base.OneTo{Int}}}}(
+          init, Unstored(Zeros{elt}(2, 2))
+        )
 
       # 0-dim constructors
       v = randn(elt, 1)
@@ -259,6 +270,16 @@ using LinearAlgebra:
       @test cosh.(a_ones) ≡ DiagonalMatrix(Fill(cosh(one(elt)), 2))
       @test cosh.(a_zeros) ≡ DiagonalMatrix(Ones{typeof(cosh(zero(elt)))}(2))
     end
+    @testset "Array properties" begin
+      a = DiagonalMatrix(randn(elt, 2))
+      @test !iszero(a)
+
+      a = DiagonalMatrix(zeros(elt, 2))
+      @test iszero(a)
+
+      a = DiagonalMatrix(Zeros{elt}(2))
+      @test iszero(a)
+    end
     @testset "LinearAlgebra matrix properties" begin
       @test ishermitian(DiagonalMatrix([1, 2]))
       @test !ishermitian(DiagonalMatrix([1, 2], (2, 3)))
@@ -399,6 +420,9 @@ using LinearAlgebra:
       @test d isa Diagonal{eltype(v)}
       @test diagview(d) == diagview(a)
       @test diagonaltype(a) === typeof(d)
+
+      a = randn(3, 3)
+      @test getdiagindices(a, 2:3) == diagview(a)[2:3]
     end
     @testset "delta" begin
       for (a, elt′) in (

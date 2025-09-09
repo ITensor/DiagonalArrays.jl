@@ -27,19 +27,17 @@ Base.size(a::DiagonalArray) = size(unstored(a))
 Base.axes(a::DiagonalArray) = axes(unstored(a))
 
 function DiagonalArray{T,N,D}(
-  diag::D, unstored::Unstored{T,N}
-) where {T,N,D<:AbstractVector{T}}
-  U = typeof(parent(unstored))
+  diag::D, unstored::Unstored{T,N,U}
+) where {T,N,D<:AbstractVector{T},U<:AbstractArray{T,N}}
   return DiagonalArray{T,N,D,U}(diag, unstored)
 end
-function DiagonalArray{T,N}(diag::AbstractVector{T}, unstored::Unstored{T,N}) where {T,N}
-  D = typeof(diag)
+function DiagonalArray{T,N}(
+  diag::D, unstored::Unstored{T,N}
+) where {T,N,D<:AbstractVector{T}}
   return DiagonalArray{T,N,D}(diag, unstored)
 end
 function DiagonalArray{T}(diag::AbstractVector{T}, unstored::Unstored{T,N}) where {T,N}
-  D = typeof(diag)
-  U = typeof(parent(unstored))
-  return DiagonalArray{T,N,D,U}(diag, unstored)
+  return DiagonalArray{T,N}(diag, unstored)
 end
 function DiagonalArray(diag::AbstractVector{T}, unstored::Unstored{T}) where {T}
   return DiagonalArray{T}(diag, unstored)
