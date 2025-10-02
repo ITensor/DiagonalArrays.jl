@@ -5,7 +5,7 @@
 ##   !allequal(Tuple(I)) && return nothing
 ##   return first(Tuple(I))
 ## end
-## 
+##
 ## function SparseArraysBase.storage_index_to_index(a::AbstractDiagonalArray, I)
 ##   return CartesianIndex(ntuple(Returns(I), ndims(a)))
 ## end
