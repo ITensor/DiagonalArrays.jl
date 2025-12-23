@@ -18,6 +18,8 @@ jobs:
        matrix:
          pkg:
            - 'BlockSparseArrays'
+           - 'FusionTensors'
+           - 'GradedArrays'
            - 'ITensorNetworksNext'
            - 'KroneckerArrays'
     uses: "ITensor/ITensorActions/.github/workflows/IntegrationTest.yml@main"
