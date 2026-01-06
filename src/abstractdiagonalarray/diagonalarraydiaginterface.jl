@@ -2,40 +2,34 @@
 
 diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)}))
 
-using DerivableInterfaces: DerivableInterfaces, @interface
-using SparseArraysBase:
-    SparseArraysBase, AbstractSparseArrayInterface, AbstractSparseArrayStyle
+using FunctionImplementations: FunctionImplementations
+using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayStyle
 
-abstract type AbstractDiagonalArrayInterface{N} <: AbstractSparseArrayInterface{N} end
+abstract type AbstractDiagonalArrayStyle <: AbstractSparseArrayStyle end
 
-struct DiagonalArrayInterface{N} <: AbstractDiagonalArrayInterface{N} end
-DiagonalArrayInterface{M}(::Val{N}) where {M, N} = DiagonalArrayInterface{N}()
-DiagionalArrayInterface(::Val{N}) where {N} = DiagonalArrayInterface{N}()
-DiagonalArrayInterface() = DiagonalArrayInterface{Any}()
+struct DiagonalArrayStyle <: AbstractDiagonalArrayStyle end
+const diag_style = DiagonalArrayStyle()
 
-function Base.similar(::AbstractDiagonalArrayInterface, elt::Type, ax::Tuple)
-    return similar(DiagonalArray{elt}, ax)
-end
-function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArray{<:Any, N}}) where {N}
-    return DiagonalArrayInterface{N}()
+## function Base.similar(::AbstractDiagonalArrayInterface, elt::Type, ax::Tuple)
+##     return similar(DiagonalArray{elt}, ax)
+## end
+function FunctionImplementations.Style(::Type{<:AbstractDiagonalArray})
+    return DiagonalArrayStyle()
 end
 
-abstract type AbstractDiagonalArrayStyle{N} <: AbstractSparseArrayStyle{N} end
-
-function DerivableInterfaces.interface(::Type{<:AbstractDiagonalArrayStyle{N}}) where {N}
-    return DiagonalArrayInterface{N}()
+module Broadcast
+    import SparseArraysBase as SA
+    abstract type AbstractDiagonalArrayStyle{N} <: SA.Broadcast.AbstractSparseArrayStyle{N} end
+    struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
+    DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
 end
 
-struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
-
-DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
-
-function SparseArraysBase.isstored(
+function SA.isstored(
         a::AbstractDiagonalArray{<:Any, N}, I::Vararg{Int, N}
     ) where {N}
     return allequal(I)
 end
-function SparseArraysBase.getstoredindex(
+function SA.getstoredindex(
         a::AbstractDiagonalArray{<:Any, N}, I::Vararg{Int, N}
     ) where {N}
     # TODO: Make this check optional, define `checkstored` like `checkbounds`
@@ -43,10 +37,10 @@ function SparseArraysBase.getstoredindex(
     # allequal(I) || error("Not a diagonal index.")
     return getdiagindex(a, first(I))
 end
-function SparseArraysBase.getstoredindex(a::AbstractDiagonalArray{<:Any, 0})
+function SA.getstoredindex(a::AbstractDiagonalArray{<:Any, 0})
     return getdiagindex(a, 1)
 end
-function SparseArraysBase.setstoredindex!(
+function SA.setstoredindex!(
         a::AbstractDiagonalArray{<:Any, N}, value, I::Vararg{Int, N}
     ) where {N}
     # TODO: Make this check optional, define `checkstored` like `checkbounds`
@@ -55,11 +49,11 @@ function SparseArraysBase.setstoredindex!(
     setdiagindex!(a, value, first(I))
     return a
 end
-function SparseArraysBase.setstoredindex!(a::AbstractDiagonalArray{<:Any, 0}, value)
+function SA.setstoredindex!(a::AbstractDiagonalArray{<:Any, 0}, value)
     setdiagindex!(a, value, 1)
     return a
 end
-function SparseArraysBase.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)
+function SA.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)
     return diagindices(a)
 end
 
@@ -84,8 +78,18 @@ function Base.setindex!(a::AbstractDiagonalArray, value, I::DiagIndex)
     return invoke(setindex!, Tuple{AbstractArray, Any, DiagIndex}, a, value, I)
 end
 
-@interface ::AbstractDiagonalArrayInterface function Broadcast.BroadcastStyle(type::Type)
-    return DiagonalArrayStyle{ndims(type)}()
+using SparseArraysBase: sparse_style
+const getindex_diag = diag_style(getindex)
+function getindex_diag(a::AbstractArray, I...)
+    return sparse_style(getindex)(a, I...)
+end
+const copyto!_diag = diag_style(copyto!)
+function copyto!_diag(dst::AbstractArray, src::AbstractArray)
+    return sparse_style(copyto!)(dst, src)
+end
+
+function Base.Broadcast.BroadcastStyle(type::Type{<:AbstractDiagonalArray})
+    return Broadcast.DiagonalArrayStyle{ndims(type)}()
 end
 
 using Base.Broadcast: Broadcasted, broadcasted
@@ -99,10 +103,10 @@ function broadcasted_diagview(bc::Broadcasted)
     )
     return broadcasted(m.f, map(diagview, m.args)...)
 end
-function Base.copy(bc::Broadcasted{<:DiagonalArrayStyle})
+function Base.copy(bc::Broadcasted{<:Broadcast.DiagonalArrayStyle})
     return DiagonalArray(copy(broadcasted_diagview(bc)), axes(bc))
 end
-function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:DiagonalArrayStyle})
+function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:Broadcast.DiagonalArrayStyle})
     copyto!(diagview(dest), broadcasted_diagview(bc))
     return dest
 end

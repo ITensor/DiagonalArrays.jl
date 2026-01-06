@@ -1,12 +1,12 @@
 name = "DiagonalArrays"
 uuid = "74fd4be6-21e2-4f6f-823a-4360d37c7a77"
 authors = ["ITensor developers <support@itensor.org> and contributors"]
-version = "0.3.26"
+version = "0.3.27"
 
 [deps]
 ArrayLayouts = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
-DerivableInterfaces = "6c5e35bf-e59e-4898-b73c-732dcc4ba65f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+FunctionImplementations = "7c7cc465-9c6a-495f-bdd1-f42428e86d0c"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MapBroadcast = "ebd9b9da-f48d-417c-9660-449667d60261"
 SparseArraysBase = "0d5efcca-f356-4864-8770-e1ed8d78f208"
@@ -21,11 +21,14 @@ DiagonalArraysNamedDimsArraysExt = "NamedDimsArrays"
 
 [compat]
 ArrayLayouts = "1.10.4"
-DerivableInterfaces = "0.5.5"
 FillArrays = "1.13"
+FunctionImplementations = "0.3.1"
 LinearAlgebra = "1.10"
 MapBroadcast = "0.1.10"
 MatrixAlgebraKit = "0.2, 0.3, 0.4, 0.5, 0.6"
-NamedDimsArrays = "0.10, 0.11"
-SparseArraysBase = "0.7.2"
+NamedDimsArrays = "0.12"
+SparseArraysBase = "0.8"
 julia = "1.10"
+
+[workspace]
+projects = ["benchmark", "dev", "docs", "examples", "test"]

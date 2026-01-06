@@ -1,4 +1,3 @@
-using DerivableInterfaces: permuteddims
 using DiagonalArrays:
     DiagonalArrays,
     ShapeInitializer,
@@ -18,6 +17,7 @@ using DiagonalArrays:
     diagview,
     getdiagindices
 using FillArrays: Fill, Ones, Zeros
+using FunctionImplementations: permuteddims
 using LinearAlgebra:
     Diagonal, det, ishermitian, isposdef, issymmetric, logdet, mul!, pinv, tr
 using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
@@ -229,7 +229,7 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
             @test diagview(b) ≢ diagview(a)
             @test size(b) === (4, 2, 3)
         end
-        @testset "DerivableInterfaces.permuteddims" begin
+        @testset "FunctionImplementations.permuteddims" begin
             a = DiagonalArray(randn(elt, 2), (2, 3, 4))
             b = permuteddims(a, (3, 1, 2))
             @test diagview(b) ≡ diagview(a)

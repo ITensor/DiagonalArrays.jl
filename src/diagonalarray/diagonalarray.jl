@@ -22,7 +22,7 @@ struct DiagonalArray{T, N, D <: AbstractVector{T}, U <: AbstractArray{T, N}} <:
     end
 end
 
-SparseArraysBase.unstored(a::DiagonalArray) = a.unstored
+SA.unstored(a::DiagonalArray) = a.unstored
 Base.size(a::DiagonalArray) = size(unstored(a))
 Base.axes(a::DiagonalArray) = axes(unstored(a))
 
@@ -291,7 +291,8 @@ function Base.permutedims(a::DiagonalArray, perm)
     return DiagonalArray(copy(diagview(a)), ax_perm)
 end
 
-function DerivableInterfaces.permuteddims(a::DiagonalArray, perm)
+using FunctionImplementations: FunctionImplementations
+function FunctionImplementations.permuteddims(a::DiagonalArray, perm)
     ((ndims(a) == length(perm)) && isperm(perm)) ||
         throw(ArgumentError("Not a valid permutation"))
     ax_perm = ntuple(d -> axes(a)[perm[d]], ndims(a))
@@ -300,7 +301,6 @@ function DerivableInterfaces.permuteddims(a::DiagonalArray, perm)
 end
 
 # Scalar indexing.
-using DerivableInterfaces: @interface, interface
 one_based_range(r) = false
 one_based_range(r::Base.OneTo) = true
 one_based_range(r::Base.Slice) = true
@@ -335,8 +335,10 @@ function Base.view(a::DiagonalArray, I...)
         invoke(view, Tuple{AbstractArray, Vararg}, a, I′...)
     end
 end
+using FunctionImplementations: style
+using SparseArraysBase: sparse_style
 function Base.getindex(a::DiagonalArray, I::Int...)
-    return @interface interface(a) a[I...]
+    return sparse_style(getindex)(a, I...)
 end
 function Base.getindex(a::DiagonalArray, I::DiagIndex)
     return getdiagindex(a, index(I))
@@ -349,7 +351,7 @@ function Base.getindex(a::DiagonalArray, I...)
     I′ = to_indices(a, I)
     return if all(i -> i isa Real, I′)
         # Catch scalar indexing case.
-        @interface interface(a) a[I...]
+        return style(a)(getindex)(a, I...)
     elseif all(one_based_range, I′)
         _getindex_diag(a, I′...)
     else
@@ -379,7 +381,7 @@ end
 # TODO: These definitions work around this issue:
 # https://github.com/JuliaArrays/FillArrays.jl/issues/416
 # when the diagonal is a FillArrays.Ones or Zeros.
-using Base.Broadcast: Broadcast, broadcast, broadcasted
+using Base.Broadcast: broadcast, broadcasted
 using FillArrays: AbstractFill, Ones, Zeros
 _broadcasted(f::F, a::AbstractArray) where {F} = broadcasted(f, a)
 _broadcasted(::typeof(identity), a::Ones) = a
@@ -407,8 +409,8 @@ _broadcasted(::typeof(cosh), a::Zeros) = Ones{typeof(cosh(zero(eltype(a))))}(axe
 # Eager version of `_broadcasted`.
 _broadcast(f::F, a::AbstractArray) where {F} = copy(_broadcasted(f, a))
 
-function Broadcast.broadcasted(
-        ::DiagonalArrayStyle{N}, f::F, a::DiagonalArray{T, N, Diag}
+function Base.Broadcast.broadcasted(
+        ::Broadcast.DiagonalArrayStyle{N}, f::F, a::DiagonalArray{T, N, Diag}
     ) where {F, T, N, Diag <: AbstractFill{T}}
     # TODO: Check that `f` preserves zeros?
     return DiagonalArray(_broadcasted(f, diagview(a)), axes(a))
