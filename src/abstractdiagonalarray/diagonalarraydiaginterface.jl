@@ -10,9 +10,6 @@ abstract type AbstractDiagonalArrayStyle <: AbstractSparseArrayStyle end
 struct DiagonalArrayStyle <: AbstractDiagonalArrayStyle end
 const diag_style = DiagonalArrayStyle()
 
-## function Base.similar(::AbstractDiagonalArrayInterface, elt::Type, ax::Tuple)
-##     return similar(DiagonalArray{elt}, ax)
-## end
 function FunctionImplementations.Style(::Type{<:AbstractDiagonalArray})
     return DiagonalArrayStyle()
 end
@@ -24,24 +21,26 @@ module Broadcast
     DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
 end
 
-function SA.isstored(
-        a::AbstractDiagonalArray{<:Any, N}, I::Vararg{Int, N}
-    ) where {N}
-    return allequal(I)
-end
-function SA.getstoredindex(
-        a::AbstractDiagonalArray{<:Any, N}, I::Vararg{Int, N}
+using SparseArraysBase: getstoredindex
+const getstoredindex_diag = diag_style(getstoredindex)
+function getstoredindex_diag(
+        a::AbstractArray{<:Any, N}, I::Vararg{Int, N}
     ) where {N}
     # TODO: Make this check optional, define `checkstored` like `checkbounds`
     # in SparseArraysBase.jl.
     # allequal(I) || error("Not a diagonal index.")
     return getdiagindex(a, first(I))
 end
-function SA.getstoredindex(a::AbstractDiagonalArray{<:Any, 0})
+function getstoredindex_diag(a::AbstractArray{<:Any, 0})
     return getdiagindex(a, 1)
 end
-function SA.setstoredindex!(
-        a::AbstractDiagonalArray{<:Any, N}, value, I::Vararg{Int, N}
+function getstoredindex_diag(a::AbstractArray, I::Int...)
+    return sparse_style(getstoredindex)(a, I...)
+end
+using SparseArraysBase: setstoredindex!
+const setstoredindex!_diag = diag_style(setstoredindex!)
+function setstoredindex!_diag(
+        a::AbstractArray{<:Any, N}, value, I::Vararg{Int, N}
     ) where {N}
     # TODO: Make this check optional, define `checkstored` like `checkbounds`
     # in SparseArraysBase.jl.
@@ -49,11 +48,13 @@ function SA.setstoredindex!(
     setdiagindex!(a, value, first(I))
     return a
 end
-function SA.setstoredindex!(a::AbstractDiagonalArray{<:Any, 0}, value)
+function setstoredindex!_diag(a::AbstractArray{<:Any, 0}, value)
     setdiagindex!(a, value, 1)
     return a
 end
-function SA.eachstoredindex(::IndexCartesian, a::AbstractDiagonalArray)
+using SparseArraysBase: eachstoredindex
+const eachstoredindex_diag = diag_style(eachstoredindex)
+function eachstoredindex_diag(::IndexCartesian, a::AbstractArray)
     return diagindices(a)
 end
 
@@ -80,13 +81,34 @@ end
 
 using SparseArraysBase: sparse_style
 const getindex_diag = diag_style(getindex)
-function getindex_diag(a::AbstractArray, I...)
-    return sparse_style(getindex)(a, I...)
-end
+getindex_diag(a::AbstractArray, I...) = sparse_style(getindex)(a, I...)
+const setindex!_diag = diag_style(setindex!)
+setindex!_diag(a::AbstractArray, value, I...) = sparse_style(setindex!)(a, value, I...)
 const copyto!_diag = diag_style(copyto!)
-function copyto!_diag(dst::AbstractArray, src::AbstractArray)
-    return sparse_style(copyto!)(dst, src)
+copyto!_diag(dst::AbstractArray, src::AbstractArray) = sparse_style(copyto!)(dst, src)
+const map_diag = diag_style(map)
+map_diag(f, as::AbstractArray...) = sparse_style(map)(f, as...)
+const map!_diag = diag_style(map!)
+map!_diag(f, dst::AbstractArray, as::AbstractArray...) = sparse_style(map!)(f, dst, as...)
+const fill!_diag = diag_style(fill!)
+fill!_diag(a::AbstractArray, value) = sparse_style(fill!)(a, value)
+using FunctionImplementations: zero!
+const zero!_diag = diag_style(zero!)
+zero!_diag(a::AbstractArray) = sparse_style(zero!)(a)
+using SparseArraysBase: isstored
+const isstored_diag = diag_style(isstored)
+function isstored_diag(
+        a::AbstractArray{<:Any, N}, I::Vararg{Int, N}
+    ) where {N}
+    return allequal(I)
 end
+isstored_diag(a::AbstractArray, I::Int...) = sparse_style(isstored)(a, I...)
+using SparseArraysBase: storedvalues
+const storedvalues_diag = diag_style(storedvalues)
+storedvalues_diag(a::AbstractArray) = diagview(a)
+using SparseArraysBase: storedpairs
+const storedpairs_diag = diag_style(storedpairs)
+storedpairs_diag(a::AbstractArray) = sparse_style(storedpairs)(a)
 
 function Base.Broadcast.BroadcastStyle(type::Type{<:AbstractDiagonalArray})
     return Broadcast.DiagonalArrayStyle{ndims(type)}()
