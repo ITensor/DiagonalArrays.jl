@@ -1,7 +1,7 @@
 using Adapt: adapt
 using DiagonalArrays: DiagonalArray, δ, delta, diagview
 using JLArrays: JLArray
-using NamedDimsArrays: dename, nameddims, namedoneto, inds
+using NamedDimsArrays: denamed, nameddims, namedoneto, inds
 using SparseArraysBase: dense
 using Test: @test, @test_broken, @testset
 
@@ -24,15 +24,15 @@ using Test: @test, @test_broken, @testset
             @test eltype(a) ≡ Bool
             # TODO: Fix this.
             @test_broken diagview(a)
-            @test diagview(dename(a)) == ones(2)
+            @test diagview(denamed(a)) == ones(2)
         end
     end
     @testset "DiagonalArrays" begin
         s = dev(DiagonalArray(randn(elt, 3), (3, 3)))
         a = nameddims(s, (:a, :b))
         b = dense(a)
-        @test dename(b) == dense(dename(a))
-        @test dename(b) isa arrayt{elt, 2}
+        @test denamed(b) == dense(denamed(a))
+        @test denamed(b) isa arrayt{elt, 2}
         @test inds(b) == inds(a)
     end
 end
