@@ -3,20 +3,20 @@
 diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)}))
 
 using FunctionImplementations: FunctionImplementations
-using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayStyle
+using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayImplementationStyle
 
-abstract type AbstractDiagonalArrayStyle <: AbstractSparseArrayStyle end
+abstract type AbstractDiagonalArrayImplementationStyle <: AbstractSparseArrayImplementationStyle end
 
-struct DiagonalArrayStyle <: AbstractDiagonalArrayStyle end
-const diag_style = DiagonalArrayStyle()
+struct DiagonalArrayImplementationStyle <: AbstractDiagonalArrayImplementationStyle end
+const diag_style = DiagonalArrayImplementationStyle()
 
-function FunctionImplementations.Style(::Type{<:AbstractDiagonalArray})
-    return DiagonalArrayStyle()
+function FunctionImplementations.ImplementationStyle(::Type{<:AbstractDiagonalArray})
+    return DiagonalArrayImplementationStyle()
 end
 
 module Broadcast
     import SparseArraysBase as SA
-    abstract type AbstractDiagonalArrayStyle{N} <: SA.Broadcast.AbstractSparseArrayStyle{N} end
+    abstract type AbstractDiagonalArrayStyle{N} <: SA.AbstractSparseArrayStyle{N} end
     struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
     DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
 end
