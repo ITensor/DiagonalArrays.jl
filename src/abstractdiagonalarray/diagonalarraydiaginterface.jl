@@ -3,23 +3,21 @@
 diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)}))
 
 using FunctionImplementations: FunctionImplementations
-using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayStyle
+using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayImplementationStyle
 
-abstract type AbstractDiagonalArrayStyle <: AbstractSparseArrayStyle end
+abstract type AbstractDiagonalArrayImplementationStyle <: AbstractSparseArrayImplementationStyle end
 
-struct DiagonalArrayStyle <: AbstractDiagonalArrayStyle end
-const diag_style = DiagonalArrayStyle()
+struct DiagonalArrayImplementationStyle <: AbstractDiagonalArrayImplementationStyle end
+const diag_style = DiagonalArrayImplementationStyle()
 
-function FunctionImplementations.Style(::Type{<:AbstractDiagonalArray})
-    return DiagonalArrayStyle()
+function FunctionImplementations.ImplementationStyle(::Type{<:AbstractDiagonalArray})
+    return DiagonalArrayImplementationStyle()
 end
 
-module Broadcast
-    import SparseArraysBase as SA
-    abstract type AbstractDiagonalArrayStyle{N} <: SA.Broadcast.AbstractSparseArrayStyle{N} end
-    struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
-    DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
-end
+using SparseArraysBase: AbstractSparseArrayStyle
+abstract type AbstractDiagonalArrayStyle{N} <: AbstractSparseArrayStyle{N} end
+struct DiagonalArrayStyle{N} <: AbstractDiagonalArrayStyle{N} end
+DiagonalArrayStyle{M}(::Val{N}) where {M, N} = DiagonalArrayStyle{N}()
 
 using SparseArraysBase: getstoredindex
 const getstoredindex_diag = diag_style(getstoredindex)
@@ -111,7 +109,7 @@ const storedpairs_diag = diag_style(storedpairs)
 storedpairs_diag(a::AbstractArray) = sparse_style(storedpairs)(a)
 
 function Base.Broadcast.BroadcastStyle(type::Type{<:AbstractDiagonalArray})
-    return Broadcast.DiagonalArrayStyle{ndims(type)}()
+    return DiagonalArrayStyle{ndims(type)}()
 end
 
 using Base.Broadcast: Broadcasted, broadcasted
@@ -125,10 +123,10 @@ function broadcasted_diagview(bc::Broadcasted)
     )
     return broadcasted(m.f, map(diagview, m.args)...)
 end
-function Base.copy(bc::Broadcasted{<:Broadcast.DiagonalArrayStyle})
+function Base.copy(bc::Broadcasted{<:DiagonalArrayStyle})
     return DiagonalArray(copy(broadcasted_diagview(bc)), axes(bc))
 end
-function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:Broadcast.DiagonalArrayStyle})
+function Base.copyto!(dest::AbstractArray, bc::Broadcasted{<:DiagonalArrayStyle})
     copyto!(diagview(dest), broadcasted_diagview(bc))
     return dest
 end

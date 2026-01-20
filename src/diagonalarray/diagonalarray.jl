@@ -410,7 +410,7 @@ _broadcasted(::typeof(cosh), a::Zeros) = Ones{typeof(cosh(zero(eltype(a))))}(axe
 _broadcast(f::F, a::AbstractArray) where {F} = copy(_broadcasted(f, a))
 
 function Base.Broadcast.broadcasted(
-        ::Broadcast.DiagonalArrayStyle{N}, f::F, a::DiagonalArray{T, N, Diag}
+        ::DiagonalArrayStyle{N}, f::F, a::DiagonalArray{T, N, Diag}
     ) where {F, T, N, Diag <: AbstractFill{T}}
     # TODO: Check that `f` preserves zeros?
     return DiagonalArray(_broadcasted(f, diagview(a)), axes(a))
