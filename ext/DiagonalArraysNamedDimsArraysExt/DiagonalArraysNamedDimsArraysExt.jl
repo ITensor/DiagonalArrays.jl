@@ -1,13 +1,13 @@
 module DiagonalArraysNamedDimsArraysExt
 
 using DiagonalArrays: DiagonalArrays, δ, delta
-using NamedDimsArrays: AbstractNamedUnitRange, nameddims
+using NamedDimsArrays: AbstractNamedUnitRange, denamed, name, nameddims
 
 function DiagonalArrays.delta(
         elt::Type{<:Number},
         is::Tuple{AbstractNamedUnitRange, Vararg{AbstractNamedUnitRange}},
     )
-    return nameddims(delta(elt, Int.(length.(is))), is)
+    return nameddims(delta(elt, length.(denamed.(is))), name.(is))
 end
 # TODO: Make `δ` an alias for `delta` so this isn't needed.
 function DiagonalArrays.δ(
