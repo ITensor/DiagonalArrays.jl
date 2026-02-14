@@ -1,12 +1,15 @@
 using FillArrays: AbstractFillVector, Ones, OnesVector
 
-const ScaledDelta{T, N, Diag <: AbstractFillVector{T}, Unstored <: AbstractArray{T, N}} = DiagonalArray{
+const ScaledDelta{T, N, Diag <: AbstractFillVector{T}, Unstored <: AbstractArray{T, N}} =
+    DiagonalArray{
     T, N, Diag, Unstored,
 }
-const ScaledDeltaVector{T, Diag <: AbstractFillVector{T}, Unstored <: AbstractVector{T}} = DiagonalVector{
+const ScaledDeltaVector{T, Diag <: AbstractFillVector{T}, Unstored <: AbstractVector{T}} =
+    DiagonalVector{
     T, Diag, Unstored,
 }
-const ScaledDeltaMatrix{T, Diag <: AbstractFillVector{T}, Unstored <: AbstractMatrix{T}} = DiagonalMatrix{
+const ScaledDeltaMatrix{T, Diag <: AbstractFillVector{T}, Unstored <: AbstractMatrix{T}} =
+    DiagonalMatrix{
     T, Diag, Unstored,
 }
 
@@ -45,16 +48,24 @@ function Delta{T}(ax::Tuple{}) where {T}
 end
 
 function delta(
-        elt::Type, ax::Tuple{AbstractUnitRange{<:Integer}, Vararg{AbstractUnitRange{<:Integer}}}
+        elt::Type, ax::Tuple{
+            AbstractUnitRange{<:Integer},
+            Vararg{AbstractUnitRange{<:Integer}},
+        }
     )
     return Delta{elt}(ax)
 end
 function δ(
-        elt::Type, ax::Tuple{AbstractUnitRange{<:Integer}, Vararg{AbstractUnitRange{<:Integer}}}
+        elt::Type, ax::Tuple{
+            AbstractUnitRange{<:Integer},
+            Vararg{AbstractUnitRange{<:Integer}},
+        }
     )
     return delta(elt, ax)
 end
-function delta(ax::Tuple{AbstractUnitRange{<:Integer}, Vararg{AbstractUnitRange{<:Integer}}})
+function delta(
+        ax::Tuple{AbstractUnitRange{<:Integer}, Vararg{AbstractUnitRange{<:Integer}}}
+    )
     return delta(Float64, ax)
 end
 function δ(ax::Tuple{AbstractUnitRange{<:Integer}, Vararg{AbstractUnitRange{<:Integer}}})

@@ -1,5 +1,5 @@
-using DiagonalArrays: DiagonalArrays
 using Aqua: Aqua
+using DiagonalArrays: DiagonalArrays
 using Test: @testset
 
 @testset "Code quality (Aqua.jl)" begin

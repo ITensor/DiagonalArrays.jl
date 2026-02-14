@@ -1,11 +1,12 @@
 using Adapt: adapt
-using DiagonalArrays: DiagonalArray, δ, delta, diagview
+using DiagonalArrays: DiagonalArray, delta, diagview, δ
 using JLArrays: JLArray
-using NamedDimsArrays: denamed, nameddims, namedoneto, inds
+using NamedDimsArrays: denamed, inds, nameddims, namedoneto
 using SparseArraysBase: dense
 using Test: @test, @test_broken, @testset
 
-@testset "NamedDimsArrayExt (eltype=$elt, arraytype=$arrayt)" for elt in (Float64, ComplexF64),
+@testset "NamedDimsArrayExt (eltype=$elt, arraytype=$arrayt)" for elt in
+        (Float64, ComplexF64),
         arrayt in (Array, JLArray)
 
     dev = adapt(arrayt)

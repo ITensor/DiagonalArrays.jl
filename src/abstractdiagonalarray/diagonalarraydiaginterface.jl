@@ -5,7 +5,8 @@ diagview(a::AbstractDiagonalArray) = throw(MethodError(diagview, Tuple{typeof(a)
 using FunctionImplementations: FunctionImplementations
 using SparseArraysBase: SparseArraysBase as SA, AbstractSparseArrayImplementationStyle
 
-abstract type AbstractDiagonalArrayImplementationStyle <: AbstractSparseArrayImplementationStyle end
+abstract type AbstractDiagonalArrayImplementationStyle <:
+AbstractSparseArrayImplementationStyle end
 
 struct DiagonalArrayImplementationStyle <: AbstractDiagonalArrayImplementationStyle end
 const diag_style = DiagonalArrayImplementationStyle()
@@ -119,7 +120,7 @@ using MapBroadcast: Mapped
 function broadcasted_diagview(bc::Broadcasted)
     m = Mapped(bc)
     iszero(m.f(map(zero ∘ eltype, m.args)...)) || error(
-        "Broadcasting DiagonalArrays with function that doesn't preserve zeros isn't supported yet.",
+        "Broadcasting DiagonalArrays with function that doesn't preserve zeros isn't supported yet."
     )
     return broadcasted(m.f, map(diagview, m.args)...)
 end

@@ -1,4 +1,5 @@
-const DiagonalMatrix{T, Diag <: AbstractVector{T}, Unstored <: AbstractMatrix{T}} = DiagonalArray{
+const DiagonalMatrix{T, Diag <: AbstractVector{T}, Unstored <: AbstractMatrix{T}} =
+    DiagonalArray{
     T, 2, Diag, Unstored,
 }
 
@@ -11,7 +12,7 @@ function mul_diagviews(a1, a2)
     dual(axes(a1, 2)) == axes(a2, 1) || throw(
         DimensionMismatch(
             lazy"Incompatible dimensions for multiplication: $(axes(a1)) and $(axes(a2))"
-        ),
+        )
     )
     d1 = diagview(a1)
     d2 = diagview(a2)
@@ -25,12 +26,12 @@ function mul!_diagviews(a_dest, a1, a2)
     axes(a_dest, 1) == axes(a1, 1) || throw(
         DimensionMismatch(
             lazy"Incompatible dimensions for multiplication: $(axes(a_dest)) and $(axes(a1))"
-        ),
+        )
     )
     axes(a_dest, 2) == axes(a2, 2) || throw(
         DimensionMismatch(
             lazy"Incompatible dimensions for multiplication: $(axes(a_dest)) and $(axes(a2))"
-        ),
+        )
     )
     d_dest = diagview(a_dest)
     d1, d2 = mul_diagviews(a1, a2)

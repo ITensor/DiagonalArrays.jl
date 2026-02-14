@@ -1,54 +1,14 @@
 module DiagonalArraysMatrixAlgebraKitExt
 
-using DiagonalArrays:
-    AbstractDiagonalMatrix,
-    DeltaMatrix,
-    DiagonalMatrix,
-    ScaledDeltaMatrix,
-    δ,
-    diagview,
-    dual,
-    issquare
+using DiagonalArrays: AbstractDiagonalMatrix, DeltaMatrix, DiagonalMatrix,
+    ScaledDeltaMatrix, diagview, dual, issquare, δ
 using LinearAlgebra: LinearAlgebra, isdiag, ishermitian
-using MatrixAlgebraKit:
-    MatrixAlgebraKit,
-    AbstractAlgorithm,
-    check_input,
-    default_qr_algorithm,
-    eig_full,
-    eig_full!,
-    eig_vals,
-    eig_vals!,
-    eigh_full,
-    eigh_full!,
-    eigh_vals,
-    eigh_vals!,
-    left_null,
-    left_null!,
-    left_orth,
-    left_orth!,
-    left_polar,
-    left_polar!,
-    lq_compact,
-    lq_compact!,
-    lq_full,
-    lq_full!,
-    qr_compact,
-    qr_compact!,
-    qr_full,
-    qr_full!,
-    right_null,
-    right_null!,
-    right_orth,
-    right_orth!,
-    right_polar,
-    right_polar!,
-    svd_compact,
-    svd_compact!,
-    svd_full,
-    svd_full!,
-    svd_vals,
-    svd_vals!
+using MatrixAlgebraKit: MatrixAlgebraKit, AbstractAlgorithm, check_input,
+    default_qr_algorithm, eig_full, eig_full!, eig_vals, eig_vals!, eigh_full, eigh_full!,
+    eigh_vals, eigh_vals!, left_null, left_null!, left_orth, left_orth!, left_polar,
+    left_polar!, lq_compact, lq_compact!, lq_full, lq_full!, qr_compact, qr_compact!,
+    qr_full, qr_full!, right_null, right_null!, right_orth, right_orth!, right_polar,
+    right_polar!, svd_compact, svd_compact!, svd_full, svd_full!, svd_vals, svd_vals!
 
 abstract type AbstractDiagonalAlgorithm <: AbstractAlgorithm end
 
