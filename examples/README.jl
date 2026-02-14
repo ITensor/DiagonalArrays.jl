@@ -45,7 +45,8 @@ julia> Pkg.add("DiagonalArrays")
 
 # ## Examples
 
-using DiagonalArrays: DiagIndex, DiagIndices, DiagonalArray, DiagonalMatrix, diaglength, isdiagindex
+using DiagonalArrays:
+    DiagIndex, DiagIndices, DiagonalArray, DiagonalMatrix, diaglength, isdiagindex
 using Test: @test
 
 function main()

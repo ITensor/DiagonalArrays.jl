@@ -17,5 +17,5 @@ Literate.markdown(
     joinpath(pkgdir(DiagonalArrays), "docs", "src");
     flavor = Literate.DocumenterFlavor(),
     name = "index",
-    postprocess = ccq_logo,
+    postprocess = ccq_logo
 )

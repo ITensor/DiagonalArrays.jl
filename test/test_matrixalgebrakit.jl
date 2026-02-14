@@ -1,24 +1,11 @@
-using Test: @test, @testset
-using LinearAlgebra: Diagonal
-using DiagonalArrays: DiagonalArrays, DeltaMatrix, ScaledDeltaMatrix, δ, dual
+using DiagonalArrays: DiagonalArrays, DeltaMatrix, ScaledDeltaMatrix, dual, δ
 using FillArrays: Ones
-using MatrixAlgebraKit:
-    eig_full,
-    eig_vals,
-    eigh_full,
-    eigh_vals,
-    left_orth,
-    left_polar,
-    lq_compact,
-    lq_full,
-    qr_compact,
-    qr_full,
-    right_orth,
-    right_polar,
-    svd_compact,
-    svd_full,
-    svd_vals
+using LinearAlgebra: Diagonal
+using MatrixAlgebraKit: eig_full, eig_vals, eigh_full, eigh_vals, left_orth, left_polar,
+    lq_compact, lq_full, qr_compact, qr_full, right_orth, right_polar, svd_compact,
+    svd_full, svd_vals
 using StableRNGs: StableRNG
+using Test: @test, @testset
 
 struct SU2 <: AbstractUnitRange{Int}
     j::Int

@@ -1,4 +1,5 @@
-const DiagonalVector{T, Diag <: AbstractVector{T}, Unstored <: AbstractVector{T}} = DiagonalArray{
+const DiagonalVector{T, Diag <: AbstractVector{T}, Unstored <: AbstractVector{T}} =
+    DiagonalArray{
     T, 1, Diag, Unstored,
 }
 

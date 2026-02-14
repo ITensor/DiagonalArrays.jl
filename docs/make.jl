@@ -1,7 +1,12 @@
 using DiagonalArrays: DiagonalArrays
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
 
-DocMeta.setdocmeta!(DiagonalArrays, :DocTestSetup, :(using DiagonalArrays); recursive = true)
+DocMeta.setdocmeta!(
+    DiagonalArrays,
+    :DocTestSetup,
+    :(using DiagonalArrays);
+    recursive = true
+)
 
 include("make_index.jl")
 
@@ -12,9 +17,9 @@ makedocs(;
     format = Documenter.HTML(;
         canonical = "https://itensor.github.io/DiagonalArrays.jl",
         edit_link = "main",
-        assets = ["assets/favicon.ico", "assets/extras.css"],
+        assets = ["assets/favicon.ico", "assets/extras.css"]
     ),
-    pages = ["Home" => "index.md", "Reference" => "reference.md"],
+    pages = ["Home" => "index.md", "Reference" => "reference.md"]
 )
 
 deploydocs(;

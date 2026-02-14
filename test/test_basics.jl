@@ -1,27 +1,12 @@
-using DiagonalArrays:
-    DiagonalArrays,
-    ShapeInitializer,
-    Delta,
-    DeltaMatrix,
-    DiagonalArray,
-    DiagonalMatrix,
-    ScaledDelta,
-    ScaledDeltaMatrix,
-    Unstored,
-    δ,
-    delta,
-    diagindices,
-    diaglength,
-    diagonal,
-    diagonaltype,
-    diagview,
-    getdiagindices
+using DiagonalArrays: DiagonalArrays, Delta, DeltaMatrix, DiagonalArray, DiagonalMatrix,
+    ScaledDelta, ScaledDeltaMatrix, ShapeInitializer, Unstored, delta, diagindices,
+    diaglength, diagonal, diagonaltype, diagview, getdiagindices, δ
 using FillArrays: Fill, Ones, Zeros
 using FunctionImplementations: permuteddims
 using LinearAlgebra:
     Diagonal, det, ishermitian, isposdef, issymmetric, logdet, mul!, pinv, tr
 using SparseArraysBase: SparseArrayDOK, SparseMatrixDOK, sparsezeros, storedlength
-using Test: @test, @test_throws, @testset, @test_broken, @inferred
+using Test: @inferred, @test, @test_broken, @test_throws, @testset
 
 @testset "Test DiagonalArrays" begin
     @testset "DiagonalArray (eltype=$elt)" for elt in (
@@ -60,12 +45,14 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
 
             for a in (randn(elt, (3, 3)), randn(elt, (3, 4)))
                 @test diagindices(a) == diagindices(IndexLinear(), a) == 1:4:9
-                @test diagindices(IndexCartesian(), a) == CartesianIndex.(Iterators.zip(1:3, 1:3))
+                @test diagindices(IndexCartesian(), a) ==
+                    CartesianIndex.(Iterators.zip(1:3, 1:3))
             end
 
             a = randn(elt, (4, 3))
             @test diagindices(a) == diagindices(IndexLinear(), a) == 1:5:11
-            @test diagindices(IndexCartesian(), a) == CartesianIndex.(Iterators.zip(1:3, 1:3))
+            @test diagindices(IndexCartesian(), a) ==
+                CartesianIndex.(Iterators.zip(1:3, 1:3))
 
             for a in (randn(elt, (3, 3, 3)), randn(elt, (3, 3, 4)))
                 @test diagindices(a) == diagindices(IndexLinear(), a) == 1:13:27
@@ -118,16 +105,28 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}}(init, Base.OneTo.((2, 2))...) ≡
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}}(init, (2, 2)) ≡
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}}(init, 2, 2) ≡
-                DiagonalMatrix{UInt32, Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}(2, 2))) ≡
+                DiagonalMatrix{UInt32, Base.OneTo{UInt32}}(
+                    init,
+                    Unstored(Zeros{UInt32}(2, 2))
+                ) ≡
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(init, Base.OneTo.((2, 2))) ≡
-                DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(init, Base.OneTo.((2, 2))...) ≡
+                DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(
+                    init,
+                    Base.OneTo.((2, 2))...
+                ) ≡
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(init, (2, 2)) ≡
                 DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(init, 2, 2) ≡
-                DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(init, Unstored(Zeros{UInt32}(2, 2)))
+                DiagonalMatrix{UInt32, Base.OneTo{UInt32}, U}(
+                    init,
+                    Unstored(Zeros{UInt32}(2, 2))
+                )
 
             init = ShapeInitializer()
             @test DiagonalMatrix(Ones{elt}(2)) ≡
-                DiagonalMatrix{elt, Ones{elt, 1, Tuple{Base.OneTo{Int}}}}(init, Base.OneTo.((2, 2))) ≡
+                DiagonalMatrix{elt, Ones{elt, 1, Tuple{Base.OneTo{Int}}}}(
+                    init,
+                    Base.OneTo.((2, 2))
+                ) ≡
                 DiagonalMatrix{elt, Ones{elt, 1, Tuple{Base.OneTo{Int}}}}(
                     init, Base.OneTo.((2, 2))...
                 ) ≡
@@ -138,7 +137,10 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
                 )
 
             init = ShapeInitializer()
-            @test_throws ErrorException DiagonalMatrix{elt, Vector{elt}}(init, Base.OneTo.((2, 2)))
+            @test_throws ErrorException DiagonalMatrix{elt, Vector{elt}}(
+                init,
+                Base.OneTo.((2, 2))
+            )
             @test_throws ErrorException DiagonalMatrix{elt, Vector{elt}}(
                 init, Base.OneTo.((2, 2))...
             )
@@ -168,7 +170,10 @@ using Test: @test, @test_throws, @testset, @test_broken, @inferred
             @test DiagonalArray{<:Any, 0}(Base.OneTo(UInt32(1))) ≡
                 DiagonalArray{UInt32, 0, Base.OneTo{UInt32}}(init, ()) ≡
                 DiagonalArray{UInt32, 0, Base.OneTo{UInt32}}(init) ≡
-                DiagonalArray{UInt32, 0, Base.OneTo{UInt32}}(init, Unstored(Zeros{UInt32}()))
+                DiagonalArray{UInt32, 0, Base.OneTo{UInt32}}(
+                    init,
+                    Unstored(Zeros{UInt32}())
+                )
         end
         @testset "0-dim operations" begin
             diag = randn(elt, 1)
