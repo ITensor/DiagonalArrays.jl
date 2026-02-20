@@ -1,27 +1,25 @@
 name: "IntegrationTest"
-
 on:
   push:
     branches:
-      - 'main'
-    tags: '*'
+      - "main"
+    tags: "*"
     paths:
-      - 'Project.toml'
+      - "Project.toml"
   pull_request:
     paths:
-      - 'Project.toml'
-
+      - "Project.toml"
 jobs:
   integration-test:
     name: "IntegrationTest"
     strategy:
-       matrix:
-         pkg:
-           - 'BlockSparseArrays'
-           - 'FusionTensors'
-           - 'GradedArrays'
-           - 'ITensorNetworksNext'
-           - 'KroneckerArrays'
+      matrix:
+        pkg:
+          - "BlockSparseArrays"
+          - "FusionTensors"
+          - "GradedArrays"
+          - "ITensorNetworksNext"
+          - "KroneckerArrays"
     uses: "ITensor/ITensorActions/.github/workflows/IntegrationTest.yml@main"
     with:
       localregistry: "https://github.com/ITensor/ITensorRegistry.git"
