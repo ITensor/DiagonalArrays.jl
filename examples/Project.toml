@@ -2,8 +2,8 @@
 DiagonalArrays = "74fd4be6-21e2-4f6f-823a-4360d37c7a77"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[sources]
-DiagonalArrays = {path = ".."}
+[sources.DiagonalArrays]
+path = ".."
 
 [compat]
 DiagonalArrays = "0.3"
