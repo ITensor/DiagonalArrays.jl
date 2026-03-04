@@ -1,5 +1,6 @@
 using DiagonalArrays: DiagonalArrays
 using Documenter: Documenter, DocMeta, deploydocs, makedocs
+using ITensorFormatter: ITensorFormatter
 
 DocMeta.setdocmeta!(
     DiagonalArrays,
@@ -8,7 +9,7 @@ DocMeta.setdocmeta!(
     recursive = true
 )
 
-include("make_index.jl")
+ITensorFormatter.make_index!(pkgdir(DiagonalArrays))
 
 makedocs(;
     modules = [DiagonalArrays],
