@@ -1,6 +1,6 @@
 name = "DiagonalArrays"
 uuid = "74fd4be6-21e2-4f6f-823a-4360d37c7a77"
-version = "0.3.47"
+version = "0.3.48"
 authors = ["ITensor developers <support@itensor.org> and contributors"]
 
 [workspace]
@@ -29,6 +29,6 @@ FunctionImplementations = "0.4"
 LinearAlgebra = "1.10"
 MapBroadcast = "0.1.10"
 MatrixAlgebraKit = "0.2, 0.3, 0.4, 0.5, 0.6"
-NamedDimsArrays = "0.13, 0.14"
+NamedDimsArrays = "0.13, 0.14, 0.15"
 SparseArraysBase = "0.9"
 julia = "1.10"
